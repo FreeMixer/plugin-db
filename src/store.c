@@ -478,7 +478,8 @@ int pdb_entries(const char *store, int (*fn)(void *ctx, const char *address), vo
             return -1;
         }
     closedir(d);
-    qsort(names.name, (size_t)names.n, sizeof(char *), bytewise);
+    if (names.n)
+        qsort(names.name, (size_t)names.n, sizeof(char *), bytewise);
     for (n = 0; n < names.n && !stop; n++)
     {
         char entry[PDB_PATH_MAX], address[PDB_PATH_MAX];

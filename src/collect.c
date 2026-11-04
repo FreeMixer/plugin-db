@@ -153,7 +153,8 @@ static int bundles_of(const char *dir, char ***out)
         n++;
     }
     closedir(d);
-    qsort(names, n, sizeof(*names), bytewise);
+    if (n)
+        qsort(names, n, sizeof(*names), bytewise);
     *out = names;
     return n;
 }
