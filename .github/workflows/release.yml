@@ -1,0 +1,45 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+name: release
+
+# Packages through the shared release workflows of FreeMixer/.github. A tag v<version> builds signed
+# RPMs (Fedora 44, noarch) and DEBs (Debian bookworm and trixie, all), publishes them to the OpenMixer
+# channel and attaches them to the GitHub release. A pull request or any other run is a dry run: it
+# builds and lints everything and publishes nothing.
+
+on:
+  push:
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+  actions: read
+
+jobs:
+  rpm:
+    uses: FreeMixer/.github/.github/workflows/build-rpm.yml@v1
+    with:
+      package-name: plugin-pin
+      binary-names: plugin-pin-devel plugin-pin-contract
+      publish: ${{ github.ref_type == 'tag' }}
+      needs-mod-host: false
+      # omx-contract-devel (the contract directory's install script) is the channel's
+      channel-deps: true
+    secrets: inherit
+
+  # after the RPMs: both publish into one tree, and a push that loses a race is refused
+  deb:
+    needs: rpm
+    if: ${{ !cancelled() }}
+    uses: FreeMixer/.github/.github/workflows/build-deb.yml@v1
+    with:
+      package-name: plugin-pin
+      binary-names: plugin-pin-dev plugin-pin-contract
+      publish: ${{ github.ref_type == 'tag' }}
+      dependencies: ''
+      requires: ''
+      # libomx-contract-dev is the channel's
+      channel-deps: true
+    secrets: inherit

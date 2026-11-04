@@ -1,0 +1,9 @@
+prefix=@PREFIX@
+includedir=${prefix}/include
+
+Name: plugin-pin
+Description: The pin of a plugin: its key, its words and its rules
+Version: @VERSION@
+# pin.h's SHA-256 is libcrypto's (EVP_Digest): a program that includes it links libcrypto
+Requires: libcrypto
+Cflags: -I${includedir}

@@ -1,0 +1,56 @@
+name: ci
+# A push runs on main only; a pull request already runs its branch.
+on:
+  push:
+    branches: [main, dedupe/all]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  # the shared checks, from FreeMixer/.github and nowhere else: the commit messages, no private reference, no local copy
+  public-sources:
+    uses: FreeMixer/.github/.github/workflows/public-sources-check.yml@v1
+
+  test:
+    name: build + test (${{ matrix.image }})
+    runs-on: ubuntu-latest
+    # A backstop only.
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        image: ['fedora:44', 'debian:bookworm', 'debian:trixie']
+    container: ${{ matrix.image }}
+    steps:
+      - name: Toolchain
+        run: |
+          if command -v dnf >/dev/null; then
+            dnf -y install gcc make pkgconf-pkg-config openssl-devel python3
+          else
+            apt-get update && apt-get -y install --no-install-recommends gcc libc6-dev make pkg-config libssl-dev python3
+          fi
+      - uses: actions/checkout@v4
+      - name: Tests (known answers, a consumer of an install, the sabotage arms, the version)
+        run: make test
+
+  # The declared words, with the tools a package build does not carry: the rendered header is what the installed
+  # omx-contract renders from data/ (and a header changed by hand is red), and data/ as a package validates.
+  words:
+    name: declared words (render, contract directory)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    container: fedora:44
+    steps:
+      - name: Toolchain
+        run: dnf -y install git make pkgconf-pkg-config diffutils
+      - uses: actions/checkout@v4
+      - name: Trust the checkout
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+      - name: Add the OpenMixer channel
+        uses: FreeMixer/.github/.github/actions/add-openmixer@v1
+      # a dedupe/all run builds on its siblings' dedupe/all (.github/wave-deps); @main until FreeMixer/.github moves v1 past it
+      - uses: FreeMixer/.github/.github/actions/wave-deps@main
+      - name: omx-contract
+        run: dnf -y install 'omx-contract >= 3.4.0' 'omx-contract-devel >= 3.4.0'
+      - name: make check-tools
+        run: make check-tools

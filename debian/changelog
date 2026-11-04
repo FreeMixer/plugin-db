@@ -1,0 +1,7 @@
+plugin-pin (0.1.0) unstable; urgency=medium
+
+  * First release: pin.h from plugin-hostd, its SHA-256, the omx-layout/1
+    fingerprint and its records, byte for byte, with the words of a pin
+    declared in data/pin.json.
+
+ -- Pau Aliagas <linuxnow@gmail.com>  Wed, 04 Nov 2026 12:00:00 +0100
