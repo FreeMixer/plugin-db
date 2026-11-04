@@ -49,7 +49,7 @@ test-sabotage:
 # VERSION, the spec's Version and the newest debian/changelog entry say the same (the shared release workflows require it)
 version-check:
 	@spec=$$(sed -n 's/^Version:[[:space:]]*//p' packaging/$(NAME).spec | head -1); \
-	deb=$$(sed -n '1s/^[^ ]* (\([^)]*\)).*/\1/p' debian/changelog); \
+	deb=$$(sed -n '1s/^[^ ]* (\([^)]*\)).*/\1/p' debian/changelog); deb=$${deb%%~git*}; \
 	test "$$spec" = "$(VERSION)" && test "$$deb" = "$(VERSION)" || \
 	  { echo "version-check: VERSION $(VERSION), spec $$spec, debian/changelog $$deb" >&2; exit 1; }; \
 	echo "ok   version $(VERSION) in VERSION, the spec and debian/changelog"
