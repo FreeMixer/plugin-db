@@ -1,3 +1,12 @@
+plugin-db (0.2.0) unstable; urgency=medium
+
+  * The address form, the file collection with the LV2 bundle rule
+    (newest-version), the store of layers, the state function, and the
+    command plugin-db with pin, put, show and verify; declared in
+    data/db.json and data/store.schema.json.
+
+ -- Pau Aliagas <linuxnow@gmail.com>  Wed, 04 Nov 2026 12:00:00 +0100
+
 plugin-db (0.1.0) unstable; urgency=medium
 
   * First release: pin.h from plugin-hostd, its SHA-256, the omx-layout/1

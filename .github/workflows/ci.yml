@@ -25,13 +25,15 @@ jobs:
       - name: Toolchain
         run: |
           if command -v dnf >/dev/null; then
-            dnf -y install gcc make pkgconf-pkg-config openssl-devel python3
+            dnf -y install gcc make pkgconf-pkg-config openssl-devel python3 libasan libubsan
           else
             apt-get update && apt-get -y install --no-install-recommends gcc libc6-dev make pkg-config libssl-dev python3
           fi
       - uses: actions/checkout@v4
-      - name: Tests (known answers, a consumer of an install, the sabotage arms, the version)
+      - name: Tests (known answers, the derived tables, the state by table, the collection, the store, a consumer of an install, the sabotage arms, the version)
         run: make test
+      - name: The C tests and the command under AddressSanitizer and UBSan
+        run: make test-asan
 
   # The declared words, with the tools a package build does not carry: the rendered header is what the installed
   # omx-contract renders from data/ (and a header changed by hand is red), and data/ as a package validates.
