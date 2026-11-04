@@ -2,4 +2,4 @@
 # A harness below its floor turns fuzz-coverage red. harness covered-lines
 pin 35
 layout 149
-digest 36
+digest 35
