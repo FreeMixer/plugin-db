@@ -6,7 +6,7 @@ Build-Depends: debhelper-compat (= 13),
                gcc,
                libc6-dev,
                libssl-dev,
-               libomx-contract-dev (>= 3.4.0~),
+               libomx-contract-dev (>= 3.4.0~), libomx-contract-dev (<< 4~),
                pkgconf,
                python3
 Standards-Version: 4.6.2
@@ -30,7 +30,7 @@ Package: plugin-db-contract
 Section: libs
 Architecture: all
 Multi-Arch: foreign
-Depends: omx-contract (>= 3.2.0~), ${misc:Depends}
+Depends: omx-contract (>= 3.2.0~), omx-contract (<< 4~), ${misc:Depends}
 Description: words of a plugin pin in omx-contract's contract directory
  data/pin.json of plugin-db, the verdicts, the pool words, the optional keys,
  what counts as changed and the layout formats, as the package plugin-db of
