@@ -6,13 +6,13 @@ PKG_CONFIG ?= pkg-config
 # the one version: VERSION holds it, and `make version-check` holds the spec's Version and the newest debian/changelog
 # entry to it
 VERSION := $(strip $(shell cat VERSION))
-NAME = plugin-pin
+NAME = plugin-db
 
 PREFIX = /usr/local
 INCLUDEDIR = $(PREFIX)/include
 DATADIR = $(PREFIX)/share
 
-HEADERS = include/plugin-pin/pin.h include/plugin-pin/plugin_pin_vocabulary.h
+HEADERS = include/plugin-db/pin.h include/plugin-db/plugin_db_vocabulary.h
 
 CFLAGS += -O2 -g -Wall -Wextra -std=gnu99 -D_GNU_SOURCE
 CRYPTO_CFLAGS = $(shell $(PKG_CONFIG) --cflags libcrypto)
@@ -38,7 +38,7 @@ tests/pin_test: tests/pin_test.c $(HEADERS)
 test-pin: tests/pin_test
 	./tests/pin_test
 
-# a consumer compiled and linked with what pkg-config plugin-pin says of a scratch install, and nothing else
+# a consumer compiled and linked with what pkg-config plugin-db says of a scratch install, and nothing else
 test-install:
 	sh tests/install-check.sh
 
@@ -56,7 +56,7 @@ version-check:
 
 # ---------------------------------------------------------------------------------------------------------------------
 # The checks that need tools a package build does not: run by CI (.github/workflows/ci.yml, job words).
-#   check-rendered      plugin_pin_vocabulary.h is what omx-contract renders from data/
+#   check-rendered      plugin_db_vocabulary.h is what omx-contract renders from data/
 #   test-rendered-sabotage  check-rendered fails on a header changed by hand and on data/ not rendered again
 #   check-contract-dir  data/ as a package validates with the installed contract directory
 OMX_CONTRACT ?= omx-contract
@@ -66,7 +66,7 @@ INSTALL_CONTRACT_DIR = $(firstword $(wildcard $(shell $(PKG_CONFIG) --variable=d
 
 check-tools: check-rendered test-rendered-sabotage check-contract-dir
 
-# data/ as the package plugin-pin of omx-contract's contract directory, <contractdir>/<schema major>/plugin-pin/, with
+# data/ as the package plugin-db of omx-contract's contract directory, <contractdir>/<schema major>/plugin-db/, with
 # the MANIFEST.json omx-contract's script writes
 install-contract:
 	@test -n "$(INSTALL_CONTRACT_DIR)" || { echo "install-contract: no install-contract-dir.sh: install omx-contract-devel, or set OMX_CONTRACT_DIR to a checkout" >&2; exit 1; }
@@ -87,7 +87,7 @@ render-words check-rendered:
 	@set -e; tmp=$$(mktemp -d); trap 'rm -rf $$tmp' EXIT; \
 	sh $(INSTALL_CONTRACT_DIR) $(NAME) $(VERSION) $(CONTRACT_SCHEMA_MAJOR) data $$tmp data >/dev/null; \
 	OMX_CONTRACT_PATH=$$tmp$(if $(OMX_CONTRACT_PATH),:$(OMX_CONTRACT_PATH)):$(CONTRACTDIR) \
-	  $(OMX_CONTRACT) render --target c --package $(NAME) --installed --out include/plugin-pin $(if $(filter check-rendered,$@),--check)
+	  $(OMX_CONTRACT) render --target c --package $(NAME) --installed --out include/plugin-db $(if $(filter check-rendered,$@),--check)
 
 clean:
 	rm -rf build tests/pin_test

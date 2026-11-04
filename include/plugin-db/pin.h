@@ -1,19 +1,19 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later */
 /*
- * This file is part of plugin-pin.
+ * This file is part of plugin-db.
  *
- * plugin-pin is free software: you can redistribute it and/or modify
+ * plugin-db is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * plugin-pin is distributed in the hope that it will be useful,
+ * plugin-db is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with plugin-pin.  If not, see <http://www.gnu.org/licenses/>.
+ * along with plugin-db.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright (C) 2026 Pau Aliagas <linuxnow@gmail.com>
  */
@@ -23,7 +23,7 @@
  * on libc and libcrypto. A host fills the neutral records below from its own standard interface (CLAP params, LV2
  * control ports) and calls the digest; nothing else writes these bytes. A change to the serialisation is a new scheme,
  * never an edit of this one. Nothing here opens or loads a plugin: that is the host's. The words are data/pin.json's,
- * rendered in plugin_pin_vocabulary.h.
+ * rendered in plugin_db_vocabulary.h.
  *
  * omx-layout/1, UTF-8, one '\n' after every line:
  *   line 1: "omx-layout/1 clap" or "omx-layout/1 lv2"
@@ -33,8 +33,8 @@
  *   a number: 16 lowercase hex digits of its IEEE-754 binary64 bits, "-" when none is declared
  *   in a name or symbol: '\' is "\\", a tab "\t", a newline "\n", every other byte as given */
 
-#ifndef PLUGIN_PIN_PIN_H
-#define PLUGIN_PIN_PIN_H
+#ifndef PLUGIN_DB_PIN_H
+#define PLUGIN_DB_PIN_H
 
 #include <stddef.h>
 #include <stdint.h>
@@ -44,11 +44,11 @@
 
 #include <openssl/evp.h>
 
-#include <plugin-pin/plugin_pin_vocabulary.h>
+#include <plugin-db/plugin_db_vocabulary.h>
 
 #define PHD_PIN_LAYOUT_SCHEME "omx-layout/1"
-#define PHD_PIN_LAYOUT_CLAP   OMX_PLUGIN_PIN_LAYOUT_FORMATS_CLAP
-#define PHD_PIN_LAYOUT_LV2    OMX_PLUGIN_PIN_LAYOUT_FORMATS_LV2
+#define PHD_PIN_LAYOUT_CLAP   OMX_PLUGIN_DB_PIN_LAYOUT_FORMATS_CLAP
+#define PHD_PIN_LAYOUT_LV2    OMX_PLUGIN_DB_PIN_LAYOUT_FORMATS_LV2
 #define PHD_SHA256_HEX_LEN    64
 
 /* ---------------------------------------------------------------- SHA-256 (OpenSSL's libcrypto) */
@@ -174,17 +174,17 @@ static inline int phd_pin_word_in(const char *s, const char *const *words, size_
 /* whether s is a verdict a pin can carry */
 static inline int phd_pin_verdict_valid(const char *s)
 {
-    static const char *const words[] = OMX_PLUGIN_PIN_VERDICTS_INIT;
+    static const char *const words[] = OMX_PLUGIN_DB_PIN_VERDICTS_INIT;
 
-    return phd_pin_word_in(s, words, OMX_PLUGIN_PIN_VERDICTS_COUNT);
+    return phd_pin_word_in(s, words, OMX_PLUGIN_DB_PIN_VERDICTS_COUNT);
 }
 
 /* whether s is a pool word a pin can carry */
 static inline int phd_pin_pool_valid(const char *s)
 {
-    static const char *const words[] = OMX_PLUGIN_PIN_POOLS_INIT;
+    static const char *const words[] = OMX_PLUGIN_DB_PIN_POOLS_INIT;
 
-    return phd_pin_word_in(s, words, OMX_PLUGIN_PIN_POOLS_COUNT);
+    return phd_pin_word_in(s, words, OMX_PLUGIN_DB_PIN_POOLS_COUNT);
 }
 
 /* ---------------------------------------------------------------- omx-layout/1 */

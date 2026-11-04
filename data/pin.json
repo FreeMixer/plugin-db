@@ -3,7 +3,7 @@
   "requires": {
     "omx-contract-schema": ">= 3.3.0"
   },
-  "PLUGIN_PIN_VERDICTS": {
+  "PLUGIN_DB_PIN_VERDICTS": {
     "kind": "words",
     "since": "0.1.0",
     "doc": "What the qualification of the pinned bytes said: the value of a pin's verdict key. A pin with no verdict was learned on first use and carries no judgment. A word outside these is not a pin's.",
@@ -22,7 +22,7 @@
       }
     }
   },
-  "PLUGIN_PIN_POOLS": {
+  "PLUGIN_DB_PIN_POOLS": {
     "kind": "words",
     "since": "0.1.0",
     "doc": "Whether the plugin's qualification measured the CLAP thread pool real-time safe and faster at the quantum: the value of a pin's pool key. A plugin with no word runs serial. A word outside these is not a pin's.",
@@ -37,22 +37,22 @@
       }
     }
   },
-  "PLUGIN_PIN_KEYS": {
+  "PLUGIN_DB_PIN_KEYS": {
     "kind": "words",
     "since": "0.1.0",
     "doc": "The optional words of a pin, each this key, an equals sign and its value. Each appears at most once, in either order; a word with any other key is not a pin's.",
     "words": {
       "verdict": {
         "word": "verdict",
-        "doc": "the qualification verdict of the pinned bytes, a word of PLUGIN_PIN_VERDICTS"
+        "doc": "the qualification verdict of the pinned bytes, a word of PLUGIN_DB_PIN_VERDICTS"
       },
       "pool": {
         "word": "pool",
-        "doc": "the thread pool word of the pinned bytes, a word of PLUGIN_PIN_POOLS"
+        "doc": "the thread pool word of the pinned bytes, a word of PLUGIN_DB_PIN_POOLS"
       }
     }
   },
-  "PLUGIN_PIN_CHANGES": {
+  "PLUGIN_DB_PIN_CHANGES": {
     "kind": "words",
     "since": "0.1.0",
     "doc": "What counts as changed: a pin holds the digests of the plugin's files and the fingerprint of its parameter layout, and only these two differ from it. Anything else about a plugin, its name or its version included, changes no pin.",
@@ -67,7 +67,7 @@
       }
     }
   },
-  "PLUGIN_PIN_LAYOUT_FORMATS": {
+  "PLUGIN_DB_PIN_LAYOUT_FORMATS": {
     "kind": "words",
     "since": "0.1.0",
     "doc": "The formats the layout serialisation is written for, as the first line of its bytes names them.",

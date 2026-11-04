@@ -21,8 +21,8 @@ jobs:
   rpm:
     uses: FreeMixer/.github/.github/workflows/build-rpm.yml@v1
     with:
-      package-name: plugin-pin
-      binary-names: plugin-pin-devel plugin-pin-contract
+      package-name: plugin-db
+      binary-names: plugin-db-devel plugin-db-contract
       publish: ${{ github.ref_type == 'tag' }}
       needs-mod-host: false
       # omx-contract-devel (the contract directory's install script) is the channel's
@@ -35,8 +35,8 @@ jobs:
     if: ${{ !cancelled() }}
     uses: FreeMixer/.github/.github/workflows/build-deb.yml@v1
     with:
-      package-name: plugin-pin
-      binary-names: plugin-pin-dev plugin-pin-contract
+      package-name: plugin-db
+      binary-names: plugin-db-dev plugin-db-contract
       publish: ${{ github.ref_type == 'tag' }}
       dependencies: ''
       requires: ''

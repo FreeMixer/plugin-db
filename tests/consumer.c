@@ -1,13 +1,13 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later */
 /* Copyright (C) 2026 Pau Aliagas <linuxnow@gmail.com> */
-/* A program that knows of plugin-pin only what pkg-config says: prints the digest of its one argument, a file, and of
+/* A program that knows of plugin-db only what pkg-config says: prints the digest of its one argument, a file, and of
  * one layout of each format, so install-check.sh can compare them with an implementation of its own. */
 
 #include <fcntl.h>
 #include <stdio.h>
 #include <unistd.h>
 
-#include <plugin-pin/pin.h>
+#include <plugin-db/pin.h>
 
 int main(int argc, char **argv)
 {

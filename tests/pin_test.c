@@ -18,7 +18,7 @@
  * Copyright (C) 2026 Pau Aliagas <linuxnow@gmail.com>
  */
 
-/* include/plugin-pin/pin.h against answers it did not compute: the FIPS 180-2 examples, sha256sum of a file, and
+/* include/plugin-db/pin.h against answers it did not compute: the FIPS 180-2 examples, sha256sum of a file, and
  * omx-layout/1 bytes and their digests written out by hand and hashed by another implementation (Python's hashlib). */
 
 #include <stdio.h>
@@ -26,7 +26,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#include <plugin-pin/pin.h>
+#include <plugin-db/pin.h>
 
 static int failures, checks;
 
@@ -99,7 +99,7 @@ static void sha256_known_answers(void)
 
 static void file_digest(void)
 {
-    char path[] = "/tmp/plugin-pin.XXXXXX", hex[PHD_SHA256_HEX_LEN + 1];
+    char path[] = "/tmp/plugin-db.XXXXXX", hex[PHD_SHA256_HEX_LEN + 1];
     int fd = mkstemp(path);
 
     check(fd >= 0 && write(fd, "abc", 3) == 3, "a scratch file");
@@ -183,11 +183,11 @@ static void layout_pin_words(void)
 
 static void pin_words(void)
 {
-    check(phd_pin_verdict_valid(OMX_PLUGIN_PIN_VERDICTS_IN_PROCESS) && phd_pin_verdict_valid(OMX_PLUGIN_PIN_VERDICTS_ISOLATED) &&
-          phd_pin_verdict_valid(OMX_PLUGIN_PIN_VERDICTS_REFUSED), "every declared verdict");
+    check(phd_pin_verdict_valid(OMX_PLUGIN_DB_PIN_VERDICTS_IN_PROCESS) && phd_pin_verdict_valid(OMX_PLUGIN_DB_PIN_VERDICTS_ISOLATED) &&
+          phd_pin_verdict_valid(OMX_PLUGIN_DB_PIN_VERDICTS_REFUSED), "every declared verdict");
     check(!phd_pin_verdict_valid("in_process") && !phd_pin_verdict_valid("") && !phd_pin_verdict_valid("Refused"),
           "a word outside the verdicts is not a pin's");
-    check(phd_pin_pool_valid(OMX_PLUGIN_PIN_POOLS_CORES) && phd_pin_pool_valid(OMX_PLUGIN_PIN_POOLS_OFF), "every declared pool word");
+    check(phd_pin_pool_valid(OMX_PLUGIN_DB_PIN_POOLS_CORES) && phd_pin_pool_valid(OMX_PLUGIN_DB_PIN_POOLS_OFF), "every declared pool word");
     check(!phd_pin_pool_valid("on") && !phd_pin_pool_valid(""), "a word outside the pool words is not a pin's");
     check(!strcmp(PHD_PIN_LAYOUT_CLAP, "clap") && !strcmp(PHD_PIN_LAYOUT_LV2, "lv2"), "the formats of the first line");
 }

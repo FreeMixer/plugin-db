@@ -1,4 +1,4 @@
-Source: plugin-pin
+Source: plugin-db
 Section: libdevel
 Priority: optional
 Maintainer: Pau Aliagas <linuxnow@gmail.com>
@@ -10,31 +10,31 @@ Build-Depends: debhelper-compat (= 13),
                pkgconf,
                python3
 Standards-Version: 4.6.2
-Homepage: https://github.com/FreeMixer/plugin-pin
-Vcs-Git: https://github.com/FreeMixer/plugin-pin.git
-Vcs-Browser: https://github.com/FreeMixer/plugin-pin
+Homepage: https://github.com/FreeMixer/plugin-db
+Vcs-Git: https://github.com/FreeMixer/plugin-db.git
+Vcs-Browser: https://github.com/FreeMixer/plugin-db
 Rules-Requires-Root: no
 
-Package: plugin-pin-dev
+Package: plugin-db-dev
 Architecture: all
 Multi-Arch: foreign
 Depends: libssl-dev, ${misc:Depends}
 Description: pin of a plugin: one header and its pkg-config file
- <plugin-pin/pin.h>, header-only, on libc and libcrypto: the SHA-256 of a file,
+ <plugin-db/pin.h>, header-only, on libc and libcrypto: the SHA-256 of a file,
  the omx-layout/1 fingerprint of a parameter layout, the words a pin is written
- with and the rules of what is a pin's, with the pkg-config file plugin-pin.
+ with and the rules of what is a pin's, with the pkg-config file plugin-db.
  .
  Its documentation is on openmixer.org.
 
-Package: plugin-pin-contract
+Package: plugin-db-contract
 Section: libs
 Architecture: all
 Multi-Arch: foreign
 Depends: omx-contract (>= 3.2.0~), ${misc:Depends}
 Description: words of a plugin pin in omx-contract's contract directory
- data/pin.json of plugin-pin, the verdicts, the pool words, the optional keys,
- what counts as changed and the layout formats, as the package plugin-pin of
+ data/pin.json of plugin-db, the verdicts, the pool words, the optional keys,
+ what counts as changed and the layout formats, as the package plugin-db of
  omx-contract's contract directory, under
- /usr/share/omx-contract/contract.d/3/plugin-pin.
+ /usr/share/omx-contract/contract.d/3/plugin-db.
  .
  Its documentation is on openmixer.org.
