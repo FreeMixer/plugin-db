@@ -30,7 +30,7 @@ install:
 # ---------------------------------------------------------------------------------------------------------------------
 # tests: no plugin, no daemon
 
-test: test-pin test-install test-sabotage version-check
+test: test-pin test-install test-sabotage test-abi version-check
 
 tests/pin_test: tests/pin_test.c $(HEADERS)
 	$(CC) -Iinclude $(CRYPTO_CFLAGS) $(CFLAGS) -Werror -o $@ tests/pin_test.c $(CRYPTO_LIBS)
@@ -89,8 +89,114 @@ render-words check-rendered:
 	OMX_CONTRACT_PATH=$$tmp$(if $(OMX_CONTRACT_PATH),:$(OMX_CONTRACT_PATH)):$(CONTRACTDIR) \
 	  $(OMX_CONTRACT) render --target c --package $(NAME) --installed --out include/plugin-db $(if $(filter check-rendered,$@),--check)
 
+# ---------------------------------------------------------------------------------------------------------------------
+# ABI. The library is header-only: its functions are static inline and compile into the consumer, so no symbol is
+# exported. What a host and the library share at run time is the layout of the records a host fills (the digest context,
+# the CLAP parameter, the LV2 port, the sink) and the constants beside them.
+#   test-abi        abi/plugin-db.layout is what tests/abi-layout.c prints (needs the compiler only)
+#   abi-layout      write abi/plugin-db.layout again
+#   abi-baseline    write abi/plugin-db.abi again: abidw over tests/abi-probe.c, built into a shared object that
+#                   exports one object of each of those types and is never installed
+#   abi-check       abidiff of that baseline against the tree (needs libabigail); red on a change of a type
+ABI_LAYOUT = abi/$(NAME).layout
+ABI_BASELINE = abi/$(NAME).abi
+ABI_PROBE = build/abi/libplugin-db-abi.so
+
+build/abi/abi-layout: tests/abi-layout.c $(HEADERS)
+	@mkdir -p $(@D)
+	$(CC) -Iinclude $(CRYPTO_CFLAGS) $(CFLAGS) -Werror -o $@ tests/abi-layout.c
+
+$(ABI_PROBE): tests/abi-probe.c $(HEADERS)
+	@mkdir -p $(@D)
+	$(CC) -Iinclude $(CRYPTO_CFLAGS) $(CFLAGS) -Werror -fPIC -shared -Wl,-soname,libplugin-db-abi.so -o $@ tests/abi-probe.c
+
+test-abi: build/abi/abi-layout
+	@build/abi/abi-layout | diff -u $(ABI_LAYOUT) - && echo "abi: the records are laid out as $(ABI_LAYOUT) says"
+
+abi-layout: build/abi/abi-layout
+	build/abi/abi-layout > $(ABI_LAYOUT)
+
+abi-baseline: $(ABI_PROBE)
+	abidw --headers-dir include/$(NAME) --out-file $(ABI_BASELINE) $(ABI_PROBE)
+
+abi-check: $(ABI_PROBE)
+	abidiff --headers-dir2 include/$(NAME) $(ABI_BASELINE) $(ABI_PROBE)
+
+# ---------------------------------------------------------------------------------------------------------------------
+# fuzz (fuzz/README.md): one libFuzzer harness per input surface of pin.h (the text of a pin, the bytes of a layout, the
+# digest), built with clang, AddressSanitizer and UndefinedBehaviorSanitizer into build/fuzz. None is part of `make test`.
+#   make fuzz                   build every harness
+#   make fuzz-run FUZZ_TIME=60  fuzz each for the budget; red on any crash, the input left in fuzz/findings/
+#   make fuzz-sabotage          each patch of fuzz/sabotage/ must make its harness abort on a seed, in the property its
+#                               header names
+#   make fuzz-records           each check's mutant: and input: record, alone, must make that check abort on that seed;
+#                               red on a check with no record and no not-a-property line
+#   make fuzz-coverage          line coverage of the header over each seed corpus, red below fuzz/coverage-floor.txt
+#                               or on a property check no seed reaches
+#   make fuzz-corpus            write fuzz/corpus/ again; fuzz-corpus-check is red when it is not what that writes
+FUZZ_CC        ?= clang
+FUZZ_TIME      ?= 60
+FUZZ_BUILD     := build/fuzz
+FUZZ_HARNESSES := pin layout digest
+FUZZ_SAN       := -fsanitize=address,undefined -fno-sanitize-recover=all
+FUZZ_CFLAGS    := -O1 -g -std=gnu99 -D_GNU_SOURCE -Wall -Wextra -fno-omit-frame-pointer -Iinclude -Ifuzz
+FUZZ_DEPS      := fuzz/fuzz.h fuzz/spec.h $(HEADERS)
+
+$(FUZZ_BUILD)/fuzz_%: fuzz/fuzz_%.c $(FUZZ_DEPS)
+	@mkdir -p $(@D)
+	$(FUZZ_CC) $(FUZZ_CFLAGS) $(CRYPTO_CFLAGS) $(FUZZ_SAN) -fsanitize=fuzzer $< -o $@ $(CRYPTO_LIBS)
+
+fuzz: $(FUZZ_HARNESSES:%=$(FUZZ_BUILD)/fuzz_%)
+
+fuzz-run: fuzz
+	FUZZ_BUILD=$(FUZZ_BUILD) FUZZ_TIME=$(FUZZ_TIME) fuzz/run.sh $(FUZZ_HARNESSES)
+
+fuzz-sabotage:
+	FUZZ_BUILD=$(FUZZ_BUILD) MAKE="$(MAKE)" fuzz/sabotage.sh
+
+# each record built plain and native with fuzz/standalone.c for its driver, no sanitizer, as the OSS Verify coverage
+# build is
+fuzz-records:
+	FUZZ_BUILD=$(FUZZ_BUILD) FUZZ_CC=$(FUZZ_CC) fuzz/records.sh $(FUZZ_HARNESSES)
+
+# the same harnesses without sanitizers, instrumented for llvm-cov, each run once over its seed corpus (-runs=0 runs the
+# corpus and nothing else); the llvm-cov and llvm-profdata of FUZZ_CC's own LLVM
+FUZZ_COV_BUILD := $(FUZZ_BUILD)/cov
+FUZZ_COV_FLAGS := -O0 -g -std=gnu99 -D_GNU_SOURCE -Iinclude -Ifuzz -fprofile-instr-generate -fcoverage-mapping
+LLVM_COV       ?= llvm-cov
+LLVM_PROFDATA  ?= llvm-profdata
+
+$(FUZZ_COV_BUILD)/fuzz_%: fuzz/fuzz_%.c $(FUZZ_DEPS)
+	@mkdir -p $(@D)
+	$(FUZZ_CC) $(FUZZ_COV_FLAGS) $(CRYPTO_CFLAGS) -fsanitize=fuzzer $< -o $@ $(CRYPTO_LIBS)
+
+fuzz-coverage: $(FUZZ_HARNESSES:%=$(FUZZ_COV_BUILD)/fuzz_%)
+	@set -e; for h in $(FUZZ_HARNESSES); do \
+	  rm -f $(FUZZ_COV_BUILD)/$$h.profraw; \
+	  LLVM_PROFILE_FILE=$(FUZZ_COV_BUILD)/$$h.profraw $(FUZZ_COV_BUILD)/fuzz_$$h -runs=0 fuzz/corpus/$$h/ \
+	      >$(FUZZ_COV_BUILD)/$$h.log 2>&1 || \
+	    { cat $(FUZZ_COV_BUILD)/$$h.log; echo "fuzz-coverage: fuzz_$$h failed on its own corpus"; exit 1; }; \
+	  $(LLVM_PROFDATA) merge -sparse $(FUZZ_COV_BUILD)/$$h.profraw -o $(FUZZ_COV_BUILD)/$$h.profdata; \
+	done
+	@LLVM_COV=$(LLVM_COV) fuzz/coverage.sh $(FUZZ_COV_BUILD) $(FUZZ_HARNESSES)
+
+# the seed corpus is written by fuzz/gen-corpus.c, never taken from a capture, and committed
+FUZZ_GEN := build/fuzz-gen-corpus
+$(FUZZ_GEN): fuzz/gen-corpus.c
+	@mkdir -p $(@D)
+	$(CC) $(CFLAGS) -o $@ $<
+
+fuzz-corpus: $(FUZZ_GEN)
+	rm -rf fuzz/corpus
+	$(FUZZ_GEN) fuzz/corpus
+
+fuzz-corpus-check: $(FUZZ_GEN)
+	@rm -rf build/fuzz-corpus-check
+	@$(FUZZ_GEN) build/fuzz-corpus-check
+	@diff -r build/fuzz-corpus-check fuzz/corpus && echo "fuzz/corpus is what fuzz-corpus writes"
+
 clean:
 	rm -rf build tests/pin_test
 
-.PHONY: all install test test-pin test-install test-sabotage version-check check-tools install-contract check-contract-dir \
-        test-rendered-sabotage render-words check-rendered clean
+.PHONY: all install test test-pin test-install test-sabotage test-abi abi-layout abi-baseline abi-check version-check check-tools install-contract check-contract-dir \
+        test-rendered-sabotage render-words check-rendered fuzz fuzz-run fuzz-sabotage fuzz-records fuzz-coverage fuzz-corpus fuzz-corpus-check clean

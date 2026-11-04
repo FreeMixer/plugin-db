@@ -1,0 +1,16 @@
+Breaks the check of fuzz/fuzz_layout.c:181 (`(x < y ? -1 : x > y)` is `(x < y ? 1 : x > y)` at include/plugin-db/pin.h:286).
+Caught by the seed input "clap-tie" of fuzz_layout.
+
+diff --git a/include/plugin-db/pin.h b/include/plugin-db/pin.h
+index e9304ed..6680b52 100644
+--- a/include/plugin-db/pin.h
++++ b/include/plugin-db/pin.h
+@@ -283,7 +283,7 @@ static inline int phd_layout_clap_order(const void *a, const void *b)
+     const phd_layout_clap_param_t *x = *(const phd_layout_clap_param_t *const *)a;
+     const phd_layout_clap_param_t *y = *(const phd_layout_clap_param_t *const *)b;
+ 
+-    return x->id != y->id ? (x->id < y->id ? -1 : 1) : (x < y ? -1 : x > y);
++    return x->id != y->id ? (x->id < y->id ? -1 : 1) : (x < y ? 1 : x > y);
+ }
+ 
+ static inline int phd_layout_lv2_order(const void *a, const void *b)

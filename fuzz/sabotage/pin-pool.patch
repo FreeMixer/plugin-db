@@ -1,0 +1,16 @@
+Breaks the check of fuzz/fuzz_pin.c:141 (`phd_pin_word_in(s, words, OMX_PLUGIN_DB_PIN_POOLS_COUNT)` is `1` at include/plugin-db/pin.h:187).
+Caught by the seed input "pool-bogus" of fuzz_pin.
+
+diff --git a/include/plugin-db/pin.h b/include/plugin-db/pin.h
+index e9304ed..3ad7c9c 100644
+--- a/include/plugin-db/pin.h
++++ b/include/plugin-db/pin.h
+@@ -184,7 +184,7 @@ static inline int phd_pin_pool_valid(const char *s)
+ {
+     static const char *const words[] = OMX_PLUGIN_DB_PIN_POOLS_INIT;
+ 
+-    return phd_pin_word_in(s, words, OMX_PLUGIN_DB_PIN_POOLS_COUNT);
++    return 1;
+ }
+ 
+ /* ---------------------------------------------------------------- omx-layout/1 */

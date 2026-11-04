@@ -1,0 +1,25 @@
+phd_sha256_t size 16 align 8
+phd_sha256_t.ctx offset 0 size 8
+phd_sha256_t.ok offset 8 size 4
+phd_layout_clap_param_t size 48 align 8
+phd_layout_clap_param_t.id offset 0 size 4
+phd_layout_clap_param_t.name offset 8 size 8
+phd_layout_clap_param_t.min offset 16 size 8
+phd_layout_clap_param_t.max offset 24 size 8
+phd_layout_clap_param_t.def offset 32 size 8
+phd_layout_clap_param_t.flags offset 40 size 4
+phd_layout_lv2_port_t size 64 align 8
+phd_layout_lv2_port_t.index offset 0 size 4
+phd_layout_lv2_port_t.symbol offset 8 size 8
+phd_layout_lv2_port_t.output offset 16 size 4
+phd_layout_lv2_port_t.has offset 20 size 4
+phd_layout_lv2_port_t.min offset 24 size 8
+phd_layout_lv2_port_t.max offset 32 size 8
+phd_layout_lv2_port_t.def offset 40 size 8
+phd_layout_lv2_port_t.properties offset 48 size 8
+phd_layout_lv2_port_t.nproperties offset 56 size 8
+phd_layout_sink_t size 8 align 8
+PHD_SHA256_HEX_LEN 64
+PHD_LAYOUT_HAS_MIN 1
+PHD_LAYOUT_HAS_MAX 2
+PHD_LAYOUT_HAS_DEF 4

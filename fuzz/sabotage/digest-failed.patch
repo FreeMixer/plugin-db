@@ -1,0 +1,16 @@
+Breaks the check of fuzz/fuzz_digest.c:83 (`hex[0] = '\0';` is dropped at include/plugin-db/pin.h:91).
+Caught by the seed input "abandoned" of fuzz_digest.
+
+diff --git a/include/plugin-db/pin.h b/include/plugin-db/pin.h
+index e9304ed..67e5152 100644
+--- a/include/plugin-db/pin.h
++++ b/include/plugin-db/pin.h
+@@ -88,7 +88,7 @@ static inline int phd_sha256_final(phd_sha256_t *c, char hex[PHD_SHA256_HEX_LEN
+     c->ok = c->ok && EVP_DigestFinal_ex(c->ctx, md, &got) == 1 && got == 32;
+     EVP_MD_CTX_free(c->ctx);
+     c->ctx = NULL;
+-    hex[0] = '\0';
++
+     if (!c->ok)
+         return -1;
+     for (n = 0; n < 32; n++)

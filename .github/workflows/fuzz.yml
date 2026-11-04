@@ -1,0 +1,47 @@
+name: fuzz
+# The libFuzzer harnesses of fuzz/ (fuzz/README.md), built with clang under AddressSanitizer and
+# UndefinedBehaviorSanitizer and fuzzed for 60 s each from their seed corpus. Before the run: the seed corpus is what
+# fuzz-corpus writes, every check's mutant record is met on its own seed (make fuzz-records), every fuzz/sabotage/ patch
+# is caught by the check it names (make fuzz-sabotage), and each harness holds its coverage floor with every check
+# reached (make fuzz-coverage). A crashing input is uploaded as the fuzz-findings artifact. make test stays in ci.yml.
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  fuzz:
+    name: fuzz the pin's text, the layout bytes and the digest
+    runs-on: ubuntu-latest
+    # A backstop: fuzz-run spends 60 s on each of three harnesses.
+    timeout-minutes: 20
+    container: fedora:44
+    steps:
+      - name: clang, libFuzzer, llvm-cov and libcrypto
+        run: |
+          dnf -y install --setopt=install_weak_deps=False --setopt=retries=10 clang compiler-rt llvm \
+            gcc make git gawk diffutils pkgconf-pkg-config openssl-devel
+      - uses: actions/checkout@v4
+      # fuzz-records and fuzz-sabotage change include/ and put it back with git
+      - name: Trust the checkout
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+      - name: Build the harnesses
+        run: make fuzz
+      - name: The seed corpus is what fuzz-corpus writes
+        run: make fuzz-corpus-check
+      - name: Every check's mutant record is met on its own seed
+        run: make fuzz-records
+      - name: Every sabotage patch is caught by the check it names, and only by it
+        run: make fuzz-sabotage
+      - name: Each harness holds its coverage floor and reaches every check
+        run: make fuzz-coverage
+      - name: Fuzz each harness for 60 s
+        run: make fuzz-run FUZZ_TIME=60
+      - name: Upload the crashing inputs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fuzz-findings
+          path: fuzz/findings/
+          if-no-files-found: ignore

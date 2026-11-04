@@ -1,0 +1,16 @@
+Breaks the check of fuzz/fuzz_pin.c:129 (`phd_pin_word_in(s, words, OMX_PLUGIN_DB_PIN_VERDICTS_COUNT)` is `1` at include/plugin-db/pin.h:179).
+Caught by the seed input "verdict-bogus" of fuzz_pin.
+
+diff --git a/include/plugin-db/pin.h b/include/plugin-db/pin.h
+index e9304ed..cceab70 100644
+--- a/include/plugin-db/pin.h
++++ b/include/plugin-db/pin.h
+@@ -176,7 +176,7 @@ static inline int phd_pin_verdict_valid(const char *s)
+ {
+     static const char *const words[] = OMX_PLUGIN_DB_PIN_VERDICTS_INIT;
+ 
+-    return phd_pin_word_in(s, words, OMX_PLUGIN_DB_PIN_VERDICTS_COUNT);
++    return 1;
+ }
+ 
+ /* whether s is a pool word a pin can carry */

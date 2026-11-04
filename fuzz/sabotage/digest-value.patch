@@ -1,0 +1,16 @@
+Breaks the check of fuzz/fuzz_digest.c:39 (`data, size` is `data, size / 2` at include/plugin-db/pin.h:108).
+Caught by the seed input "abc" of fuzz_digest.
+
+diff --git a/include/plugin-db/pin.h b/include/plugin-db/pin.h
+index e9304ed..9e839ec 100644
+--- a/include/plugin-db/pin.h
++++ b/include/plugin-db/pin.h
+@@ -105,7 +105,7 @@ static inline int phd_sha256_hex(const void *data, size_t size, char hex[PHD_SHA
+     phd_sha256_t c;
+ 
+     phd_sha256_init(&c);
+-    phd_sha256_update(&c, data, size);
++    phd_sha256_update(&c, data, size / 2);
+     return phd_sha256_final(&c, hex);
+ }
+ 

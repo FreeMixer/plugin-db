@@ -1,0 +1,16 @@
+Breaks the check of fuzz/fuzz_pin.c:60 (`s[n] <= 'f'` is `s[n] <= 'g'` at include/plugin-db/pin.h:140).
+Caught by the seed input "digest-g" of fuzz_pin.
+
+diff --git a/include/plugin-db/pin.h b/include/plugin-db/pin.h
+index e9304ed..aeb1579 100644
+--- a/include/plugin-db/pin.h
++++ b/include/plugin-db/pin.h
+@@ -137,7 +137,7 @@ static inline int phd_pin_hex_valid(const char *s)
+     int n;
+ 
+     for (n = 0; n < PHD_SHA256_HEX_LEN; n++)
+-        if (!((s[n] >= '0' && s[n] <= '9') || (s[n] >= 'a' && s[n] <= 'f')))
++        if (!((s[n] >= '0' && s[n] <= '9') || (s[n] >= 'a' && s[n] <= 'g')))
+             return 0;
+     return s[n] == '\0';
+ }
