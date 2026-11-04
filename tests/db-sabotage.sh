@@ -4,7 +4,8 @@
 #
 # Each arm breaks one rule of the state function, the bundle rule, the collection, the store or the derivation from
 # data/ in a copy of the tree, and the tests over it must go red. An arm whose text is gone is itself a failure: a
-# guard nothing reaches is no guard. The first arm is plugin-hostd's old rule, the first bundle in path order.
+# guard nothing reaches is no guard. The first arm is plugin-hostd's rule: of the bundles that hold a binary, the first
+# in path order.
 set -eu
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
@@ -31,8 +32,8 @@ PY
 
 S=src/state.c C=src/collect.c T=src/store.c
 # the bundle rule
-arm "the first bundle in path order (plugin-hostd's rule)" $C "    if (a->realises != b->realises) => return 0;
-    if (a->realises != b->realises)" test-collect
+arm "plugin-hostd's rule: of the bundles with a binary, the first in path order" $C "    if (a->minor != b->minor) => return 0;
+    if (a->minor != b->minor)" test-collect
 arm "a complement bundle ranks as one that realises" $C "    if (a->realises != b->realises)
         return a->realises > b->realises; => " test-collect
 arm "the micro version is not read" $C "    return a->micro > b->micro; => return 0;" test-collect
