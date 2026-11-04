@@ -1,0 +1,387 @@
+{
+  "$schema": "../schema/omx-contract.schema.json",
+  "requires": {
+    "omx-contract-schema": ">= 3.3.0"
+  },
+  "PLUGIN_DB_ADDRESS_FORMATS": {
+    "kind": "words",
+    "since": "0.2.0",
+    "doc": "The one address form of a plugin: <format>:<id>, or clap@<sha256>:<id> when several files share one CLAP id, the sha256 that of the .clap file. An LV2 address carries no sha256: the bundle rule makes one bundle the plugin. A path is never part of an address, so a session keeps its plugins on another machine. The format is one of these words; an id is the plugin's own, its CLAP id or its LV2 URI, and a CLAP id that begins with '/' is a path and no address.",
+    "words": {
+      "clap": {
+        "word": "clap",
+        "doc": "a CLAP plugin: the id is the plugin descriptor's id"
+      },
+      "lv2": {
+        "word": "lv2",
+        "doc": "an LV2 plugin: the id is the plugin's URI"
+      }
+    }
+  },
+  "PLUGIN_DB_BUNDLE_RULES": {
+    "kind": "words",
+    "since": "0.2.0",
+    "doc": "Which LV2 bundle is the plugin, when several bundles of the search path name it: the one rule in force, and the only word of this item. A bundle realises the plugin when its manifest names the plugin with an lv2:binary; one that only names it (a MOD GUI, a preset bundle) complements it. The candidates are the realising bundles, or, when none realises it, the bundles that name it.",
+    "words": {
+      "newestVersion": {
+        "word": "newest-version",
+        "doc": "of the candidates, the one whose manifest gives the plugin the highest lv2:minorVersion, then the highest lv2:microVersion, a version not stated counting as 0; of equal versions the first in the search path, its directories in order and the bundles of one directory in byte order of their names. This is lilv's rule, so the host loads the bundle plugin-db pins."
+      }
+    }
+  },
+  "PLUGIN_DB_LAYERS": {
+    "kind": "words",
+    "since": "0.2.0",
+    "doc": "The layers of an entry, each with one writer. An entry is a directory of the store, and each layer is one file of it, the word and .json, in the envelope data/store.schema.json declares. The entry is the join of its layers at read time and is never stored.",
+    "words": {
+      "declared": {
+        "word": "declared",
+        "doc": "meaning, units, travel and defaults, installed with the package by the plugin's owner, read only"
+      },
+      "scanned": {
+        "word": "scanned",
+        "doc": "identity, controls, ports, presets and GUI evidence, written by plugin-qualify under its runner"
+      },
+      "pinned": {
+        "word": "pinned",
+        "doc": "the files of the plugin with their digests and the layout fingerprint, written through plugin-db"
+      },
+      "measured": {
+        "word": "measured",
+        "doc": "latency, cost and behaviour per rate and quantum with the conditions, written by the probes; may be wiped"
+      },
+      "judged": {
+        "word": "judged",
+        "doc": "the record: verdict, conditions and what it was measured under, written by plugin-qualify's judgement"
+      },
+      "reference": {
+        "word": "reference",
+        "doc": "a record from a reference machine, installed by omx-qualification-records, read only"
+      },
+      "corrected": {
+        "word": "corrected",
+        "doc": "renames, hidden controls and scale a person chose, written by the override module"
+      },
+      "warnedOverride": {
+        "word": "warned-override",
+        "doc": "a person's choice to run a refused plugin anyway, alone; it binds the pin it was written for and does not survive an upgrade"
+      },
+      "observed": {
+        "word": "observed",
+        "doc": "crash and xrun history, written by plugin-hostd and the engine"
+      }
+    }
+  },
+  "PLUGIN_DB_FILES": {
+    "kind": "words",
+    "since": "0.2.0",
+    "doc": "What the check found of the plugin's files against its pinned layer, as rpm -V reports an attribute. Could not test is never same.",
+    "words": {
+      "same": {
+        "word": "same",
+        "doc": "every file the plugin loads is held by the pin and has the digest the pin holds"
+      },
+      "changed": {
+        "word": "changed",
+        "doc": "a file differs from its digest, is gone, is new, or another bundle is now the plugin"
+      },
+      "absent": {
+        "word": "absent",
+        "doc": "the plugin is in no file of the search path any more, or its pinned file is gone"
+      },
+      "couldNotTest": {
+        "word": "could-not-test",
+        "doc": "there is no pinned layer, or a file or the pin could not be read"
+      }
+    }
+  },
+  "PLUGIN_DB_LAYOUT": {
+    "kind": "words",
+    "since": "0.2.0",
+    "doc": "What the check found of the plugin's parameter layout against the layout fingerprint of its pinned layer.",
+    "words": {
+      "same": {
+        "word": "same",
+        "doc": "the layout has the pinned fingerprint: the files are the pinned bytes, or a host found the pinned fingerprint"
+      },
+      "changed": {
+        "word": "changed",
+        "doc": "a host found another fingerprint than the pinned one"
+      },
+      "notYetKnown": {
+        "word": "not-yet-known",
+        "doc": "the pin holds no layout, or the files changed and no host has found their layout yet"
+      }
+    }
+  },
+  "PLUGIN_DB_RECORD": {
+    "kind": "words",
+    "since": "0.2.0",
+    "doc": "Whether the judged layer, the record, answers for these bytes on this machine now.",
+    "words": {
+      "current": {
+        "word": "current",
+        "doc": "it was written for the pinned bytes and layout, and nothing of PLUGIN_DB_RECORD_CHANGES makes it stale"
+      },
+      "stale": {
+        "word": "stale",
+        "doc": "it exists, and a change of PLUGIN_DB_RECORD_CHANGES, or files that could not be tested, keep it from answering"
+      },
+      "none": {
+        "word": "none",
+        "doc": "there is no judged layer"
+      }
+    }
+  },
+  "PLUGIN_DB_RECORD_ACTIONS": {
+    "kind": "words",
+    "since": "0.2.0",
+    "doc": "What a change since a record was written asks for, each in the group of PLUGIN_DB_RECORD it leaves the record in.",
+    "groups": "PLUGIN_DB_RECORD",
+    "words": {
+      "fullPath": {
+        "word": "full-path",
+        "group": "stale",
+        "doc": "scan, pin, measure and judge again"
+      },
+      "measureHere": {
+        "word": "measure-here",
+        "group": "stale",
+        "doc": "measure and judge on this class of machine; the record stays valid for its own class"
+      },
+      "convert": {
+        "word": "convert",
+        "group": "stale",
+        "doc": "convert the record to the schema in force, with no new measurement"
+      },
+      "rejudge": {
+        "word": "rejudge",
+        "group": "stale",
+        "doc": "judge the measurements again, automatically, with no new measurement"
+      },
+      "remeasureBackground": {
+        "word": "remeasure-background",
+        "group": "current",
+        "doc": "the record stays current, shown as measured under the host it names, and is measured again in the background"
+      }
+    }
+  },
+  "PLUGIN_DB_RECORD_CHANGES": {
+    "kind": "words",
+    "since": "0.2.0",
+    "doc": "What may have changed since a record was written, each the row of the staleness table with the action it asks for. When several changed, the first in this order answers.",
+    "groups": "PLUGIN_DB_RECORD_ACTIONS",
+    "words": {
+      "files": {
+        "word": "files",
+        "group": "full-path",
+        "doc": "the plugin's files are not the bytes the record was written for, or could not be tested"
+      },
+      "layout": {
+        "word": "layout",
+        "group": "full-path",
+        "doc": "the parameter layout is not the one the record was written for, or is not yet known"
+      },
+      "hostingChange": {
+        "word": "hosting-change",
+        "group": "full-path",
+        "doc": "the host is a release that declares a hosting change: its hosting epoch is past the record's. The host's owner declares it in the contract; no reader guesses"
+      },
+      "machineClass": {
+        "word": "machine-class",
+        "group": "measure-here",
+        "doc": "this machine is of another class than the record's"
+      },
+      "schema": {
+        "word": "schema",
+        "group": "convert",
+        "doc": "the record schema in force is not the record's"
+      },
+      "rules": {
+        "word": "rules",
+        "group": "rejudge",
+        "doc": "the judgement rules in force are not the ones the record was judged by"
+      },
+      "hostVersion": {
+        "word": "host-version",
+        "group": "remeasure-background",
+        "doc": "the host is a normal release other than the one the record was measured under"
+      }
+    }
+  },
+  "PLUGIN_DB_STATES": {
+    "kind": "words",
+    "since": "0.2.0",
+    "doc": "What a plugin is, from its attributes, its record, a shipped record and a warned override, answered by one function and by no reader for itself. There is no upgraded and no crashed state: new bytes have no record, so they are unqualified. Each state is in the group of PLUGIN_DB_RUNS it runs as; a refusal a warned override covers runs alone instead.",
+    "groups": "PLUGIN_DB_RUNS",
+    "words": {
+      "unqualified": {
+        "word": "unqualified",
+        "group": "alone",
+        "doc": "no current record, for any reason: runs alone in its own limited worker, never grouped; shown as not qualified, with the reason"
+      },
+      "qualified": {
+        "word": "qualified",
+        "group": "shared",
+        "doc": "a current record whose verdict allows it and whose conditions are met here: runs as the verdict and the placement rules allow"
+      },
+      "isolatedOnly": {
+        "word": "isolated-only",
+        "group": "alone",
+        "doc": "a current record that says it is safe only alone: runs alone"
+      },
+      "conditionsUnmet": {
+        "word": "conditions-unmet",
+        "group": "alone",
+        "doc": "a current record with no cell for this rate or quantum, or a condition that fails here: runs alone, as unqualified"
+      },
+      "refused": {
+        "word": "refused",
+        "group": "not-loaded",
+        "doc": "a current record or a shipped refusal says refused: not loaded, unless a warned override says run alone"
+      },
+      "absent": {
+        "word": "absent",
+        "group": "not-loaded",
+        "doc": "the files are gone: not loaded"
+      }
+    }
+  },
+  "PLUGIN_DB_RUNS": {
+    "kind": "words",
+    "since": "0.2.0",
+    "doc": "How a state runs at load.",
+    "words": {
+      "shared": {
+        "word": "shared",
+        "doc": "as the verdict and the placement rules allow, in a worker other plugins may share"
+      },
+      "alone": {
+        "word": "alone",
+        "doc": "in its own limited worker, never grouped"
+      },
+      "notLoaded": {
+        "word": "not-loaded",
+        "doc": "not loaded: shown with its reason and its saved values kept; an effect passes audio through, an instrument is silent"
+      }
+    }
+  },
+  "PLUGIN_DB_REASONS": {
+    "kind": "words",
+    "since": "0.2.0",
+    "doc": "Why a plugin is in its state, each in the group of PLUGIN_DB_STATES it explains: what show prints beside the state.",
+    "groups": "PLUGIN_DB_STATES",
+    "words": {
+      "neverPinned": {
+        "word": "never-pinned",
+        "group": "unqualified",
+        "doc": "there is no pinned layer: never scanned or never pinned"
+      },
+      "measurementPending": {
+        "word": "measurement-pending",
+        "group": "unqualified",
+        "doc": "pinned, and there is no record yet"
+      },
+      "couldNotTest": {
+        "word": "could-not-test",
+        "group": "unqualified",
+        "doc": "the files or the pin could not be read"
+      },
+      "filesChanged": {
+        "word": "files-changed",
+        "group": "unqualified",
+        "doc": "the files are not the pinned bytes"
+      },
+      "layoutChanged": {
+        "word": "layout-changed",
+        "group": "unqualified",
+        "doc": "the layout is not the pinned one"
+      },
+      "layoutNotYetKnown": {
+        "word": "layout-not-yet-known",
+        "group": "unqualified",
+        "doc": "the pin holds no layout, so a record cannot bind one"
+      },
+      "recordStale": {
+        "word": "record-stale",
+        "group": "unqualified",
+        "doc": "the record is stale for a change of PLUGIN_DB_RECORD_CHANGES, which show names with its action"
+      },
+      "notMeasuredUnderHost": {
+        "word": "not-measured-under-host",
+        "group": "unqualified",
+        "doc": "the verdict says alone, and the record was not measured under plugin-hostd, which isolated only needs"
+      },
+      "verdictAllows": {
+        "word": "verdict-allows",
+        "group": "qualified",
+        "doc": "the record's verdict allows a shared worker and its conditions are met here"
+      },
+      "verdictIsolated": {
+        "word": "verdict-isolated",
+        "group": "isolated-only",
+        "doc": "the record's verdict says it is safe only alone"
+      },
+      "referenceOnly": {
+        "word": "reference-only",
+        "group": "isolated-only",
+        "doc": "a shipped record matches the pin and was measured on another class of machine: reference figures only, until measured here"
+      },
+      "noCell": {
+        "word": "no-cell",
+        "group": "conditions-unmet",
+        "doc": "the record has no cell for this rate and quantum"
+      },
+      "conditionFails": {
+        "word": "condition-fails",
+        "group": "conditions-unmet",
+        "doc": "a condition of the record does not hold here, or is not known here"
+      },
+      "recordRefused": {
+        "word": "record-refused",
+        "group": "refused",
+        "doc": "the record says refused; the way back is a rescan, a requalification or a warned override that runs it alone"
+      },
+      "shippedRefusal": {
+        "word": "shipped-refusal",
+        "group": "refused",
+        "doc": "a shipped record of these bytes says refused, which wins over everything and no warned override overrides"
+      },
+      "filesGone": {
+        "word": "files-gone",
+        "group": "absent",
+        "doc": "the plugin's files are gone; show names the path that was pinned"
+      }
+    }
+  },
+  "PLUGIN_DB_ISOLATION_HOSTS": {
+    "kind": "words",
+    "since": "0.2.0",
+    "doc": "The hosts a verdict of isolated must have been measured under to make a plugin isolated only: a record that says alone and names another host leaves the plugin unqualified.",
+    "words": {
+      "pluginHostd": {
+        "word": "plugin-hostd",
+        "doc": "the daemon that hosts plugins for use, in workers of their own"
+      }
+    }
+  },
+  "PLUGIN_DB_SOURCES": {
+    "kind": "words",
+    "since": "0.2.0",
+    "doc": "Where the record that answers comes from, as show prints it.",
+    "words": {
+      "none": {
+        "word": "none",
+        "doc": "no record answers"
+      },
+      "local": {
+        "word": "local",
+        "doc": "the judged layer: measured here"
+      },
+      "reference": {
+        "word": "reference",
+        "doc": "the reference layer: a shipped record, measured on a reference machine"
+      }
+    }
+  }
+}
