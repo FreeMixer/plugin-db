@@ -1,0 +1,5 @@
+# Covered header lines each harness's seed corpus reaches (make fuzz-coverage, fuzz/coverage.sh).
+# A harness below its floor turns fuzz-coverage red. harness covered-lines
+pin 35
+layout 149
+digest 36

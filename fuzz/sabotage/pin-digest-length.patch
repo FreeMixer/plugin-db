@@ -1,0 +1,16 @@
+Breaks the check of fuzz/fuzz_pin.c:72 (`s[n] == '\0'` is `1` at include/plugin-db/pin.h:142).
+Caught by the seed input "digest-65" of fuzz_pin.
+
+diff --git a/include/plugin-db/pin.h b/include/plugin-db/pin.h
+index e9304ed..df8f5b6 100644
+--- a/include/plugin-db/pin.h
++++ b/include/plugin-db/pin.h
+@@ -139,7 +139,7 @@ static inline int phd_pin_hex_valid(const char *s)
+     for (n = 0; n < PHD_SHA256_HEX_LEN; n++)
+         if (!((s[n] >= '0' && s[n] <= '9') || (s[n] >= 'a' && s[n] <= 'f')))
+             return 0;
+-    return s[n] == '\0';
++    return 1;
+ }
+ 
+ /* a layout pin "<scheme>:<sha256>" split at its last ':'; 0, or -1 when it is not one */

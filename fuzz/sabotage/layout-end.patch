@@ -1,0 +1,16 @@
+Breaks the check of fuzz/fuzz_layout.c:283 (`free(order);` is `sink(ctx, "\n", 1); free(order);` at include/plugin-db/pin.h:332).
+Caught by the seed input "clap-basic" of fuzz_layout.
+
+diff --git a/include/plugin-db/pin.h b/include/plugin-db/pin.h
+index e9304ed..1058cce 100644
+--- a/include/plugin-db/pin.h
++++ b/include/plugin-db/pin.h
+@@ -329,7 +329,7 @@ static inline int phd_layout_clap_write(const phd_layout_clap_param_t *params, s
+         phd_layout_uint(sink, ctx, p->flags, 1);
+         sink(ctx, "\n", 1);
+     }
+-    free(order);
++    sink(ctx, "\n", 1); free(order);
+     return 0;
+ }
+ 

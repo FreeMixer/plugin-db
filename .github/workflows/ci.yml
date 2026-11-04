@@ -54,3 +54,21 @@ jobs:
         run: dnf -y install 'omx-contract >= 3.4.0' 'omx-contract-devel >= 3.4.0'
       - name: make check-tools
         run: make check-tools
+
+  # The records a host fills: their layout as abi/ holds it (make test-abi runs in the test job above), and the types as
+  # libabigail reads them from tests/abi-probe.c against abi/plugin-db.abi.
+  abi:
+    name: ABI check (abidiff against abi/)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    container: fedora:44
+    steps:
+      - name: Toolchain
+        run: dnf -y install gcc make git pkgconf-pkg-config openssl-devel diffutils binutils libabigail
+      - uses: actions/checkout@v4
+      - name: Trust the checkout
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+      - name: Layout of the records
+        run: make test-abi
+      - name: Types against the baseline
+        run: make abi-check

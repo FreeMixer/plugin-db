@@ -1,0 +1,16 @@
+Breaks the check of fuzz/fuzz_layout.c:228 (`p->flags, 1` is `p->flags, 0` at include/plugin-db/pin.h:329).
+Caught by the seed input "clap-basic" of fuzz_layout.
+
+diff --git a/include/plugin-db/pin.h b/include/plugin-db/pin.h
+index e9304ed..7320142 100644
+--- a/include/plugin-db/pin.h
++++ b/include/plugin-db/pin.h
+@@ -326,7 +326,7 @@ static inline int phd_layout_clap_write(const phd_layout_clap_param_t *params, s
+         sink(ctx, "\t", 1);
+         phd_layout_number(sink, ctx, p->def, 1);
+         sink(ctx, "\t", 1);
+-        phd_layout_uint(sink, ctx, p->flags, 1);
++        phd_layout_uint(sink, ctx, p->flags, 0);
+         sink(ctx, "\n", 1);
+     }
+     free(order);

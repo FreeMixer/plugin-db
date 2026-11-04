@@ -1,0 +1,16 @@
+Breaks the check of fuzz/fuzz_pin.c:91 (`colon == token ||` is dropped at include/plugin-db/pin.h:152).
+Caught by the seed input "token-empty-scheme" of fuzz_pin.
+
+diff --git a/include/plugin-db/pin.h b/include/plugin-db/pin.h
+index e9304ed..e87d73b 100644
+--- a/include/plugin-db/pin.h
++++ b/include/plugin-db/pin.h
+@@ -149,7 +149,7 @@ static inline int phd_pin_layout_parse(const char *token, char *scheme, size_t s
+     const char *colon = strrchr(token, ':');
+     size_t n;
+ 
+-    if (!colon || colon == token || !phd_pin_hex_valid(colon + 1))
++    if (!colon || !phd_pin_hex_valid(colon + 1))
+         return -1;
+     n = (size_t)(colon - token);
+     if (n >= scheme_size)

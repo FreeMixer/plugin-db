@@ -1,0 +1,16 @@
+Breaks the check of fuzz/fuzz_layout.c:296 (`data, size` is `data, size > 1 ? size - 1 : size` at include/plugin-db/pin.h:394).
+Caught by the seed input "clap-basic" of fuzz_layout.
+
+diff --git a/include/plugin-db/pin.h b/include/plugin-db/pin.h
+index e9304ed..d27e52a 100644
+--- a/include/plugin-db/pin.h
++++ b/include/plugin-db/pin.h
+@@ -391,7 +391,7 @@ static inline int phd_layout_lv2_write(const phd_layout_lv2_port_t *ports, size_
+ 
+ static inline void phd_layout_hash_sink(void *ctx, const char *data, size_t size)
+ {
+-    phd_sha256_update((phd_sha256_t *)ctx, data, size);
++    phd_sha256_update((phd_sha256_t *)ctx, data, size > 1 ? size - 1 : size);
+ }
+ 
+ /* the fingerprint of a CLAP layout, 64 hex digits; 0, or -1 when memory runs out or libcrypto fails */

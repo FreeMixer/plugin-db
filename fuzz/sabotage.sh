@@ -2,38 +2,122 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Copyright (C) 2026 Pau Aliagas <linuxnow@gmail.com>
 #
-# Each arm breaks one parsing rule in a copy of the header; the harness built over the copy must abort on the seed corpus.
-# An arm whose text is gone from the header is itself a failure.
-set -eu
-tmp=$(mktemp -d)
-trap 'rm -rf "$tmp"' EXIT
-CLANG=${CLANG:-clang}
-crypto=$(pkg-config --cflags --libs libcrypto)
-fail=0
+# `make fuzz-sabotage`: A PROPERTY NO MUTANT CAN BREAK CHECKS NOTHING. fuzz/sabotage/
+# <harness>-<property>.patch is a bug in the code the harness drives, at least one for each
+# property the harness checks, as `git diff` writes it (a further bug of the same property is
+# <harness>-<property>.<what>.patch); above its `diff --git` line it names
+# the check it breaks and the seed that shows it, as OSS Verify reads a breakage patch
+# (docs/project-yaml.md, "mutants", there):
+#
+#   Breaks the check of fuzz/fuzz_<harness>.c:<abort line> (<what the bug is>).
+#   Caught by the seed input "<seed>" of fuzz_<harness>.
+#
+# This applies each, rebuilds the sanitizer harness, and runs it over every seed of its
+# corpus, one at a time; no fuzzing, so the corpus alone must catch it. A patch is found when
+# the seed it names aborts inside check_<property> (or a check_<property>_<part>), the function
+# that holds that property's checks, and every seed that fails fails by an abort() in some
+# check_ function: a bug the harness reads in two ways may stop another seed in another
+# property, but a sanitizer report or a crash outside a check makes it red. The optimizer
+# merges the abort() calls of a function, so the line is fuzz/records.sh's to prove, in a
+# build that keeps them apart. The source is restored with `git checkout --` on every exit
+# path, and the sanitizer build is rebuilt as the tree is at the end.
+#
+# Usage: FUZZ_BUILD=build/fuzz MAKE=make sabotage.sh
+set -u
+ROOT=$(cd "$(dirname "$0")/.." && pwd)
+cd "$ROOT"
+B=${FUZZ_BUILD:-build/fuzz}
+MAKE=${MAKE:-make}
+OUT=$B/sabotage
+mkdir -p "$OUT"
 
-arm() { # <what> <before => after>
-    rm -rf "$tmp/include"
-    cp -r include "$tmp/include"
-    if ! python3 - "$tmp/include/plugin-db/pin.h" "$2" <<'PY'
-import sys
-path, ba = sys.argv[1:]
-b, a = ba.split(" => ")
-s = open(path).read()
-if b not in s:
-    sys.exit("the text is gone: " + b)
-open(path, "w").write(s.replace(b, a, 1))
-PY
-    then echo "FAIL $1: the arm no longer applies"; fail=1; return; fi
-    # shellcheck disable=SC2086 # the flags are words
-    $CLANG -g -O1 -std=gnu99 -D_GNU_SOURCE -fsanitize=fuzzer,address,undefined -I"$tmp/include" -o "$tmp/f" fuzz/fuzz_pin.c $crypto
-    if "$tmp/f" -artifact_prefix="$tmp/" -runs=0 fuzz/corpus >"$tmp/log" 2>&1; then cat "$tmp/log" | tail -5; echo "FAIL $1: stays green"; fail=1; else echo "ok   $1 is red"; fi
+patched=
+restore() {
+	[ -n "$patched" ] && git checkout -- $patched
+	patched=
 }
+trap 'restore' EXIT
+trap 'restore; exit 130' INT TERM
 
-arm "upper-case hex passes as a digest" "(s[n] >= 'a' && s[n] <= 'f') => ((s[n] | 32) >= 'a' && (s[n] | 32) <= 'f')"
-arm "a digest of 65 digits passes" "return s[n] == '\\0'; => return 1;"
-arm "an empty scheme passes" "colon == token || => "
-arm "the pin is split at the first ':'" "strrchr(token, ':') => strchr(token, ':')"
-arm "any word is a verdict" "return phd_pin_word_in(s, words, OMX_PLUGIN_DB_PIN_VERDICTS_COUNT); => return 1;"
-arm "any word is a pool word" "return phd_pin_word_in(s, words, OMX_PLUGIN_DB_PIN_POOLS_COUNT); => return 1;"
-[ "$fail" = 0 ] || exit 1
-echo "ok   fuzz-sabotage: every arm is red"
+if ! git diff --quiet -- include; then
+	echo "fuzz-sabotage: include/ has uncommitted changes; refusing to patch over them" >&2
+	exit 2
+fi
+
+missed=
+n=0
+for p in fuzz/sabotage/*.patch; do
+	[ -f "$p" ] || continue
+	m=$(basename "$p" .patch)
+	h=${m%%-*}
+	prop=${m#*-}
+	prop=${prop%%.*}
+	fn=check_$(echo "$prop" | tr - _)
+	n=$((n + 1))
+	# the check and the seed its header names
+	at=$(sed -n "s|^Breaks the check of \(fuzz/fuzz_$h\.c:[0-9]*\) (.*)\.\$|\1|p" "$p" | head -n 1)
+	named=$(sed -n "s|^Caught by the seed input \"\([^\"]*\)\" of fuzz_$h\.\$|\1|p" "$p" | head -n 1)
+	if [ -z "$at" ] || [ -z "$named" ] || [ ! -f "fuzz/corpus/$h/$named" ]; then
+		echo "$m: the header does not name a check of fuzz/fuzz_$h.c and a seed of fuzz/corpus/$h/"
+		missed="$missed $m"
+		continue
+	fi
+	files=$(git apply --numstat "$p" | awk '{ print $3 }')
+	if ! git apply "$p"; then
+		echo "$m: $p no longer applies"
+		missed="$missed $m"
+		continue
+	fi
+	patched=$files
+	echo "== $m: fuzz_$h against $(grep -m1 '^+[^+]' "$p" | sed 's/^+[[:space:]]*//')"
+	if ! $MAKE --no-print-directory "$B/fuzz_$h" >"$OUT/$m.build.log" 2>&1; then
+		cat "$OUT/$m.build.log"
+		echo "$m: the mutant does not build"
+		missed="$missed $m"
+		restore
+		continue
+	fi
+	found=0
+	own=0
+	other=
+	for seed in fuzz/corpus/$h/*; do
+		log=$OUT/$m.$(basename "$seed").log
+		"$B/fuzz_$h" -runs=1 -artifact_prefix="$OUT/$m-" "$seed" >"$log" 2>&1 && { rm -f "$log"; continue; }
+		# the innermost check_ function of the abort's stack, and whether it was an abort
+		where=$(awk '/ERROR: libFuzzer: deadly signal/ { on = 1 }
+			on && match($0, / in check_[a-z_]+/) { print substr($0, RSTART + 4, RLENGTH - 4); exit }' "$log")
+		if grep -q 'ERROR: libFuzzer: deadly signal' "$log" && [ -n "$where" ]; then
+			found=$((found + 1))
+			echo "$where" | grep -qE "^$fn(_[a-z]+)*\$" && own=$((own + 1))
+		else
+			other="$other $(basename "$seed")(${where:-$(grep -m1 -E '^SUMMARY: ' "$log")})"
+		fi
+	done
+	restore
+	log=$OUT/$m.$named.log
+	if [ -n "$other" ]; then
+		echo "$m: seeds that failed outside a check:$other"
+		echo "$m: RED -- the patch is not read as a broken property (logs in $OUT/)"
+		missed="$missed $m"
+	elif [ ! -f "$log" ] || ! awk '/ERROR: libFuzzer: deadly signal/ { on = 1 }
+			on && match($0, / in check_[a-z_]+/) { print substr($0, RSTART + 4, RLENGTH - 4); exit }' "$log" |
+			grep -qE "^$fn(_[a-z]+)*\$"; then
+		echo "$m: RED -- the seed $named does not abort in $fn"
+		missed="$missed $m"
+	else
+		echo "$m: found by $found seeds, $own in $fn, $named among them"
+	fi
+done
+
+# leave the sanitizer build as the tree is, not as the last mutant was
+$MAKE --no-print-directory fuzz >"$OUT/rebuild.log" 2>&1 || { cat "$OUT/rebuild.log"; exit 1; }
+
+if [ "$n" -eq 0 ]; then
+	echo "make fuzz-sabotage: RED -- no patch in fuzz/sabotage/"
+	exit 1
+fi
+if [ -n "$missed" ]; then
+	echo "make fuzz-sabotage: RED --$missed"
+	exit 1
+fi
+echo "make fuzz-sabotage: all $n patches found, each in the property its header names"
