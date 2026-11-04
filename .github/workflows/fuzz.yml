@@ -1,0 +1,17 @@
+name: fuzz
+# The libFuzzer harness over the text plugin-db parses (fuzz/fuzz_pin.c), through the shared workflow of FreeMixer/.github:
+# built with clang, ASan and UBSan, its sabotage arms found, then fuzzed from its seed corpus.
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  fuzz:
+    uses: FreeMixer/.github/.github/workflows/fuzz.yml@v1
+    with:
+      tools: dnf install -y --setopt=install_weak_deps=False git clang compiler-rt llvm make python3 pkgconf-pkg-config openssl-devel
+      build: make fuzz-build
+      run: make fuzz FUZZ_TIME=60
+      timeout-minutes: 15

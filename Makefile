@@ -89,8 +89,27 @@ render-words check-rendered:
 	OMX_CONTRACT_PATH=$$tmp$(if $(OMX_CONTRACT_PATH),:$(OMX_CONTRACT_PATH)):$(CONTRACTDIR) \
 	  $(OMX_CONTRACT) render --target c --package $(NAME) --installed --out include/plugin-db $(if $(filter check-rendered,$@),--check)
 
+# ---------------------------------------------------------------------------------------------------------------------
+# fuzz: libFuzzer over the text plugin-db parses (fuzz/fuzz_pin.c), built with clang, ASan and UBSan
+CLANG ?= clang
+FUZZ_TIME ?= 60
+
+fuzz-build:
+	mkdir -p build
+	$(CLANG) -g -O1 -std=gnu99 -D_GNU_SOURCE -fsanitize=fuzzer,address,undefined -fno-sanitize-recover=undefined -Iinclude $(CRYPTO_CFLAGS) -o build/fuzz_pin fuzz/fuzz_pin.c $(CRYPTO_LIBS)
+
+# the seed corpus first, then FUZZ_TIME seconds of mutation in a scratch copy of it
+fuzz: fuzz-build fuzz-sabotage
+	mkdir -p build/corpus build/findings
+	cp fuzz/corpus/* build/corpus/
+	build/fuzz_pin -runs=0 build/corpus
+	build/fuzz_pin -max_total_time=$(FUZZ_TIME) -artifact_prefix=build/findings/ build/corpus
+
+fuzz-sabotage:
+	CLANG=$(CLANG) sh fuzz/sabotage.sh
+
 clean:
 	rm -rf build tests/pin_test
 
 .PHONY: all install test test-pin test-install test-sabotage version-check check-tools install-contract check-contract-dir \
-        test-rendered-sabotage render-words check-rendered clean
+        test-rendered-sabotage render-words check-rendered fuzz-build fuzz fuzz-sabotage clean
