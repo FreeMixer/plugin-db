@@ -1,0 +1,16 @@
+Breaks the check of fuzz/fuzz_layout.c:147 (`qsort(order, count, sizeof(*order), phd_layout_clap_order);` is dropped at include/plugin-db/pin.h:313).
+Caught by the seed input "clap-unsorted" of fuzz_layout.
+
+diff --git a/include/plugin-db/pin.h b/include/plugin-db/pin.h
+index e9304ed..9c64e16 100644
+--- a/include/plugin-db/pin.h
++++ b/include/plugin-db/pin.h
+@@ -310,7 +310,7 @@ static inline int phd_layout_clap_write(const phd_layout_clap_param_t *params, s
+         return -1;
+     for (n = 0; n < count; n++)
+         order[n] = &params[n];
+-    qsort(order, count, sizeof(*order), phd_layout_clap_order);
++
+     phd_layout_put(sink, ctx, PHD_PIN_LAYOUT_SCHEME " " PHD_PIN_LAYOUT_CLAP "\n");
+     for (n = 0; n < count; n++)
+     {

@@ -1,0 +1,103 @@
+<abi-corpus version='2.2' path='build/abi/libplugin-db-abi.so' architecture='elf-amd-x86_64' soname='libplugin-db-abi.so'>
+  <elf-variable-symbols>
+    <elf-symbol name='plugin_db_abi_clap_param' size='48' type='object-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='plugin_db_abi_lv2_port' size='64' type='object-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='plugin_db_abi_sha256' size='16' type='object-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='plugin_db_abi_sink' size='8' type='object-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+  </elf-variable-symbols>
+  <abi-instr address-size='64' path='tests/abi-probe.c' comp-dir-path='/home/user/plugin-db' language='LANG_C99'>
+    <type-decl name='char' size-in-bits='8' id='type-id-1'/>
+    <type-decl name='double' size-in-bits='64' id='type-id-2'/>
+    <type-decl name='int' size-in-bits='32' id='type-id-3'/>
+    <class-decl name='PHD_LAYOUT_CLAP_PARAM_T' size-in-bits='384' is-struct='yes' visibility='default' filepath='include/plugin-db/pin.h' line='193' column='1' id='type-id-4'>
+      <data-member access='public' layout-offset-in-bits='0'>
+        <var-decl name='id' type-id='type-id-5' visibility='default' filepath='include/plugin-db/pin.h' line='194' column='1'/>
+      </data-member>
+      <data-member access='public' layout-offset-in-bits='64'>
+        <var-decl name='name' type-id='type-id-6' visibility='default' filepath='include/plugin-db/pin.h' line='195' column='1'/>
+      </data-member>
+      <data-member access='public' layout-offset-in-bits='128'>
+        <var-decl name='min' type-id='type-id-2' visibility='default' filepath='include/plugin-db/pin.h' line='196' column='1'/>
+      </data-member>
+      <data-member access='public' layout-offset-in-bits='192'>
+        <var-decl name='max' type-id='type-id-2' visibility='default' filepath='include/plugin-db/pin.h' line='196' column='1'/>
+      </data-member>
+      <data-member access='public' layout-offset-in-bits='256'>
+        <var-decl name='def' type-id='type-id-2' visibility='default' filepath='include/plugin-db/pin.h' line='196' column='1'/>
+      </data-member>
+      <data-member access='public' layout-offset-in-bits='320'>
+        <var-decl name='flags' type-id='type-id-5' visibility='default' filepath='include/plugin-db/pin.h' line='197' column='1'/>
+      </data-member>
+    </class-decl>
+    <class-decl name='PHD_LAYOUT_LV2_PORT_T' size-in-bits='512' is-struct='yes' visibility='default' filepath='include/plugin-db/pin.h' line='206' column='1' id='type-id-7'>
+      <data-member access='public' layout-offset-in-bits='0'>
+        <var-decl name='index' type-id='type-id-5' visibility='default' filepath='include/plugin-db/pin.h' line='207' column='1'/>
+      </data-member>
+      <data-member access='public' layout-offset-in-bits='64'>
+        <var-decl name='symbol' type-id='type-id-6' visibility='default' filepath='include/plugin-db/pin.h' line='208' column='1'/>
+      </data-member>
+      <data-member access='public' layout-offset-in-bits='128'>
+        <var-decl name='output' type-id='type-id-3' visibility='default' filepath='include/plugin-db/pin.h' line='209' column='1'/>
+      </data-member>
+      <data-member access='public' layout-offset-in-bits='160'>
+        <var-decl name='has' type-id='type-id-8' visibility='default' filepath='include/plugin-db/pin.h' line='210' column='1'/>
+      </data-member>
+      <data-member access='public' layout-offset-in-bits='192'>
+        <var-decl name='min' type-id='type-id-2' visibility='default' filepath='include/plugin-db/pin.h' line='211' column='1'/>
+      </data-member>
+      <data-member access='public' layout-offset-in-bits='256'>
+        <var-decl name='max' type-id='type-id-2' visibility='default' filepath='include/plugin-db/pin.h' line='211' column='1'/>
+      </data-member>
+      <data-member access='public' layout-offset-in-bits='320'>
+        <var-decl name='def' type-id='type-id-2' visibility='default' filepath='include/plugin-db/pin.h' line='211' column='1'/>
+      </data-member>
+      <data-member access='public' layout-offset-in-bits='384'>
+        <var-decl name='properties' type-id='type-id-9' visibility='default' filepath='include/plugin-db/pin.h' line='212' column='1'/>
+      </data-member>
+      <data-member access='public' layout-offset-in-bits='448'>
+        <var-decl name='nproperties' type-id='type-id-10' visibility='default' filepath='include/plugin-db/pin.h' line='213' column='1'/>
+      </data-member>
+    </class-decl>
+    <class-decl name='PHD_SHA256_T' size-in-bits='128' is-struct='yes' visibility='default' filepath='include/plugin-db/pin.h' line='57' column='1' id='type-id-11'>
+      <data-member access='public' layout-offset-in-bits='0'>
+        <var-decl name='ctx' type-id='type-id-12' visibility='default' filepath='include/plugin-db/pin.h' line='58' column='1'/>
+      </data-member>
+      <data-member access='public' layout-offset-in-bits='64'>
+        <var-decl name='ok' type-id='type-id-3' visibility='default' filepath='include/plugin-db/pin.h' line='59' column='1'/>
+      </data-member>
+    </class-decl>
+    <typedef-decl name='__uint32_t' type-id='type-id-8' filepath='/usr/include/x86_64-linux-gnu/bits/types.h' line='42' column='1' id='type-id-13'/>
+    <typedef-decl name='phd_layout_clap_param_t' type-id='type-id-4' filepath='include/plugin-db/pin.h' line='198' column='1' id='type-id-14'/>
+    <typedef-decl name='phd_layout_lv2_port_t' type-id='type-id-7' filepath='include/plugin-db/pin.h' line='214' column='1' id='type-id-15'/>
+    <typedef-decl name='phd_layout_sink_t' type-id='type-id-16' filepath='include/plugin-db/pin.h' line='217' column='1' id='type-id-17'/>
+    <typedef-decl name='phd_sha256_t' type-id='type-id-11' filepath='include/plugin-db/pin.h' line='60' column='1' id='type-id-18'/>
+    <typedef-decl name='size_t' type-id='type-id-19' filepath='/usr/lib/gcc/x86_64-linux-gnu/13/include/stddef.h' line='214' column='1' id='type-id-10'/>
+    <typedef-decl name='uint32_t' type-id='type-id-13' filepath='/usr/include/x86_64-linux-gnu/bits/stdint-uintn.h' line='26' column='1' id='type-id-5'/>
+    <type-decl name='unsigned int' size-in-bits='32' id='type-id-8'/>
+    <type-decl name='unsigned long int' size-in-bits='64' id='type-id-19'/>
+    <qualified-type-def type-id='type-id-1' const='yes' id='type-id-20'/>
+    <pointer-type-def type-id='type-id-20' size-in-bits='64' id='type-id-6'/>
+    <qualified-type-def type-id='type-id-6' const='yes' id='type-id-21'/>
+    <pointer-type-def type-id='type-id-21' size-in-bits='64' id='type-id-9'/>
+    <qualified-type-def type-id='type-id-14' const='yes' id='type-id-22'/>
+    <qualified-type-def type-id='type-id-15' const='yes' id='type-id-23'/>
+    <qualified-type-def type-id='type-id-17' const='yes' id='type-id-24'/>
+    <qualified-type-def type-id='type-id-18' const='yes' id='type-id-25'/>
+    <pointer-type-def type-id='type-id-26' size-in-bits='64' id='type-id-16'/>
+    <pointer-type-def type-id='type-id-27' size-in-bits='64' id='type-id-12'/>
+    <class-decl name='evp_md_ctx_st' is-struct='yes' visibility='default' is-declaration-only='yes' id='type-id-28'/>
+    <var-decl name='plugin_db_abi_clap_param' type-id='type-id-22' mangled-name='plugin_db_abi_clap_param' visibility='default' filepath='tests/abi-probe.c' line='15' column='1' elf-symbol-id='plugin_db_abi_clap_param'/>
+    <var-decl name='plugin_db_abi_lv2_port' type-id='type-id-23' mangled-name='plugin_db_abi_lv2_port' visibility='default' filepath='tests/abi-probe.c' line='16' column='1' elf-symbol-id='plugin_db_abi_lv2_port'/>
+    <var-decl name='plugin_db_abi_sink' type-id='type-id-24' mangled-name='plugin_db_abi_sink' visibility='default' filepath='tests/abi-probe.c' line='17' column='1' elf-symbol-id='plugin_db_abi_sink'/>
+    <type-decl name='void' id='type-id-29'/>
+    <typedef-decl name='EVP_MD_CTX' type-id='type-id-28' filepath='/usr/include/openssl/types.h' line='104' column='1' id='type-id-27'/>
+    <var-decl name='plugin_db_abi_sha256' type-id='type-id-25' mangled-name='plugin_db_abi_sha256' visibility='default' filepath='tests/abi-probe.c' line='14' column='1' elf-symbol-id='plugin_db_abi_sha256'/>
+    <pointer-type-def type-id='type-id-29' id='type-id-30'/>
+    <function-type size-in-bits='64' id='type-id-26'>
+      <parameter type-id='type-id-30'/>
+      <parameter type-id='type-id-6'/>
+      <parameter type-id='type-id-10'/>
+      <return type-id='type-id-29'/>
+    </function-type>
+  </abi-instr>
+</abi-corpus>

@@ -1,0 +1,16 @@
+Breaks the check of fuzz/fuzz_pin.c:103 (`token` is `token + 1` at include/plugin-db/pin.h:157).
+Caught by the seed input "token-ok" of fuzz_pin.
+
+diff --git a/include/plugin-db/pin.h b/include/plugin-db/pin.h
+index e9304ed..9d05faf 100644
+--- a/include/plugin-db/pin.h
++++ b/include/plugin-db/pin.h
+@@ -154,7 +154,7 @@ static inline int phd_pin_layout_parse(const char *token, char *scheme, size_t s
+     n = (size_t)(colon - token);
+     if (n >= scheme_size)
+         return -1;
+-    memcpy(scheme, token, n);
++    memcpy(scheme, token + 1, n);
+     scheme[n] = '\0';
+     memcpy(hex, colon + 1, PHD_SHA256_HEX_LEN + 1);
+     return 0;

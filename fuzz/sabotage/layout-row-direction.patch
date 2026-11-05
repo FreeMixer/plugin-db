@@ -1,0 +1,16 @@
+Breaks the check of fuzz/fuzz_layout.c:238 (`p->output ? "out" : "in"` is `p->output ? "in" : "out"` at include/plugin-db/pin.h:369).
+Caught by the seed input "lv2-basic" of fuzz_layout.
+
+diff --git a/include/plugin-db/pin.h b/include/plugin-db/pin.h
+index e9304ed..89568e1 100644
+--- a/include/plugin-db/pin.h
++++ b/include/plugin-db/pin.h
+@@ -366,7 +366,7 @@ static inline int phd_layout_lv2_write(const phd_layout_lv2_port_t *ports, size_
+         sink(ctx, "\t", 1);
+         phd_layout_text(sink, ctx, p->symbol ? p->symbol : "");
+         sink(ctx, "\t", 1);
+-        phd_layout_put(sink, ctx, p->output ? "out" : "in");
++        phd_layout_put(sink, ctx, p->output ? "in" : "out");
+         sink(ctx, "\t", 1);
+         phd_layout_number(sink, ctx, p->min, (p->has & PHD_LAYOUT_HAS_MIN) != 0);
+         sink(ctx, "\t", 1);

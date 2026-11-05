@@ -13,7 +13,7 @@ BuildRequires: pkgconfig
 BuildRequires: python3
 BuildRequires: pkgconfig(libcrypto)
 # install-contract writes the contract directory's package with omx-contract's script
-BuildRequires: omx-contract-devel >= 3.4.0
+BuildRequires: (omx-contract-devel >= 3.4.0 with omx-contract-devel < 4)
 
 %description
 plugin-db is the plugin database, in layers: the pin of a plugin, the one
@@ -36,7 +36,7 @@ Its documentation is on openmixer.org.
 
 %package contract
 Summary: The words of the plugin database in omx-contract's contract directory
-Requires: omx-contract >= 3.2.0
+Requires: (omx-contract >= 3.2.0 with omx-contract < 4)
 
 %description contract
 data/pin.json of plugin-db, the words of a pin, and data/db.json, the address
