@@ -18,7 +18,7 @@ build() { # <PKG_CONFIG_PATH> <output>
         -o "$2" tests/consumer.c $(PKG_CONFIG_PATH=$1 pkg-config --libs plugin-db) 2>"$tmp/cc.log"
 }
 
-pcdir=$PREFIX/share/pkgconfig
+pcdir=$PREFIX/lib/pkgconfig
 test "$(PKG_CONFIG_PATH=$pcdir pkg-config --modversion plugin-db)" = "$(cat VERSION)"
 build "$pcdir" "$tmp/consumer" || { cat "$tmp/cc.log"; echo "FAIL a consumer does not build with pkg-config plugin-db"; exit 1; }
 
@@ -45,5 +45,6 @@ sed '/^Cflags:/d' "$pcdir/plugin-db.pc" > "$tmp/bad/plugin-db.pc"
 if build "$tmp/bad" "$tmp/bad/consumer"; then echo "FAIL a pc file without Cflags still compiles the consumer"; exit 1; fi
 test -x "$PREFIX/bin/plugin-db" || { echo "FAIL no plugin-db command in the install"; exit 1; }
 "$PREFIX/bin/plugin-db" --store "$tmp/store" verify || { echo "FAIL the installed command is red on an empty store"; exit 1; }
+test -s "$PREFIX/share/man/man1/plugin-db.1" || { echo "FAIL the command has no manual page"; exit 1; }
 cmp -s data/store.schema.json "$PREFIX/share/plugin-db/store.schema.json" || { echo "FAIL the store's schema is not installed"; exit 1; }
-echo "ok   install: a consumer builds with only pkg-config plugin-db, its digests are hashlib's, the pc file's lines are needed, the command and the schema are installed"
+echo "ok   install: a consumer builds with only pkg-config plugin-db, its digests are hashlib's, the pc file's lines are needed, the command, its manual page and the schema are installed"

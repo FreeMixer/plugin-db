@@ -13,6 +13,7 @@ BINDIR = $(PREFIX)/bin
 INCLUDEDIR = $(PREFIX)/include
 LIBDIR = $(PREFIX)/lib
 DATADIR = $(PREFIX)/share
+MANDIR = $(DATADIR)/man
 
 HEADERS = include/plugin-db/pin.h include/plugin-db/plugin_db_vocabulary.h include/plugin-db/db.h \
           include/plugin-db/plugin_db_tables.h
@@ -45,15 +46,16 @@ $(BIN): src/cli.c $(LIB)
 	$(CC) $(ALL_CFLAGS) $(LDFLAGS) -o $@ src/cli.c $(LIB) $(CRYPTO_LIBS)
 
 install: all
-	install -d $(DESTDIR)$(INCLUDEDIR)/$(NAME) $(DESTDIR)$(DATADIR)/pkgconfig $(DESTDIR)$(BINDIR) $(DESTDIR)$(LIBDIR) \
+	install -d $(DESTDIR)$(INCLUDEDIR)/$(NAME) $(DESTDIR)$(LIBDIR)/pkgconfig $(DESTDIR)$(BINDIR) $(DESTDIR)$(MANDIR)/man1 $(DESTDIR)$(LIBDIR) \
 	  $(DESTDIR)$(DATADIR)/$(NAME)
 	install -m 644 $(HEADERS) $(DESTDIR)$(INCLUDEDIR)/$(NAME)/
 	install -m 644 $(LIB) $(DESTDIR)$(LIBDIR)/
 	install -m 755 $(BIN) $(DESTDIR)$(BINDIR)/
+	install -m 644 man/$(NAME).1 $(DESTDIR)$(MANDIR)/man1/
 	install -m 644 data/store.schema.json $(DESTDIR)$(DATADIR)/$(NAME)/
 	sed -e 's,@PREFIX@,$(PREFIX),g' -e 's,@LIBDIR@,$(LIBDIR),g' -e 's,@INCLUDEDIR@,$(INCLUDEDIR),g' \
-	  -e 's,@VERSION@,$(VERSION),g' $(NAME).pc.in > $(DESTDIR)$(DATADIR)/pkgconfig/$(NAME).pc
-	chmod 644 $(DESTDIR)$(DATADIR)/pkgconfig/$(NAME).pc
+	  -e 's,@VERSION@,$(VERSION),g' $(NAME).pc.in > $(DESTDIR)$(LIBDIR)/pkgconfig/$(NAME).pc
+	chmod 644 $(DESTDIR)$(LIBDIR)/pkgconfig/$(NAME).pc
 
 # ---------------------------------------------------------------------------------------------------------------------
 # tests: no plugin, no daemon
