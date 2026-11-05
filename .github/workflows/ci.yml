@@ -51,7 +51,7 @@ jobs:
       # a dedupe/all run builds on its siblings' dedupe/all (.github/wave-deps); @main until FreeMixer/.github moves v1 past it
       - uses: FreeMixer/.github/.github/actions/wave-deps@main
       - name: omx-contract
-        run: dnf -y install 'omx-contract >= 3.4.0' 'omx-contract-devel >= 3.4.0'
+        run: dnf -y install 'omx-contract >= 3.4.0' 'omx-contract < 4' 'omx-contract-devel >= 3.4.0' 'omx-contract-devel < 4'
       - name: make check-tools
         run: make check-tools
 
