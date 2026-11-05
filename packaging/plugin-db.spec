@@ -53,7 +53,7 @@ Its documentation is on openmixer.org.
 %make_build CFLAGS="%{optflags}"
 
 %install
-%make_install PREFIX=%{_prefix} BINDIR=%{_bindir} INCLUDEDIR=%{_includedir} LIBDIR=%{_libdir} DATADIR=%{_datadir}
+%make_install PREFIX=%{_prefix} BINDIR=%{_bindir} INCLUDEDIR=%{_includedir} LIBDIR=%{_libdir} DATADIR=%{_datadir} MANDIR=%{_mandir}
 %make_build install-contract DESTDIR=%{buildroot} PREFIX=%{_prefix}
 
 %check
@@ -63,6 +63,7 @@ make test
 %license COPYING
 %doc README.md
 %{_bindir}/plugin-db
+%{_mandir}/man1/plugin-db.1*
 %dir %{_datadir}/plugin-db
 %{_datadir}/plugin-db/store.schema.json
 
@@ -75,7 +76,7 @@ make test
 %{_includedir}/plugin-db/plugin_db_vocabulary.h
 %{_includedir}/plugin-db/plugin_db_tables.h
 %{_libdir}/libplugin-db.a
-%{_datadir}/pkgconfig/plugin-db.pc
+%{_libdir}/pkgconfig/plugin-db.pc
 
 %files contract
 %license COPYING
