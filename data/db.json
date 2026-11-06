@@ -56,7 +56,7 @@
       },
       "reference": {
         "word": "reference",
-        "doc": "a record from a reference machine, installed by omx-qualification-records, read only"
+        "doc": "a record from a reference machine, installed by plugin-db-qualification, read only"
       },
       "corrected": {
         "word": "corrected",
