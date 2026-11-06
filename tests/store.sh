@@ -143,7 +143,7 @@ expect "a re-pin: the record was for another layout" reason record-stale "lv2:$A
 pdb pin "lv2:$AMP" --lv2-path "$LV2PATH" --layout "$LAYOUT"
 
 # a shipped refusal wins over the warned override
-record refused | pdb put "lv2:$AMP" reference --writer omx-qualification-records
+record refused | pdb put "lv2:$AMP" reference --writer plugin-db-qualification
 expect "4.5 a shipped refusal" reason shipped-refusal "lv2:$AMP" $HERE
 expect "4.5 a shipped refusal" runs not-loaded "lv2:$AMP" $HERE
 expect "4.5 a shipped refusal" source reference "lv2:$AMP" $HERE
