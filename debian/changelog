@@ -1,3 +1,15 @@
+plugin-db (0.2.1) unstable; urgency=medium
+
+  * A bundle directory with a space is matched against its own file:// IRI:
+    the IRI is decoded once before the match ("my amp.lv2" is my%20amp.lv2).
+  * The pin path codec is plugin-hostd-protocol's phd_pin_path_encode and
+    phd_pin_path_decode; plugin-db's own pdb_percent_decode and
+    percent_encode are gone. A file name is escaped as the protocol says: a
+    quote, a backslash and control bytes too, and UTF-8 bytes no longer.
+  * Builds against plugin-hostd-protocol-devel >= 0.4.1 and < 0.5.
+
+ -- Pau Aliagas <linuxnow@gmail.com>  Fri, 06 Nov 2026 22:30:00 +0100
+
 plugin-db (0.2.0) unstable; urgency=medium
 
   * The address form, the file collection with the LV2 bundle rule
