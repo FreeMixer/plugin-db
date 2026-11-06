@@ -5,7 +5,6 @@
  * of a CLAP plugin. Moved from plugin-hostd (src/lv2.c lv2_pin_collect, src/formats.c clap_pin_collect, src/proc.c
  * proc_find_lv2_bundle), with one change of behaviour: the bundle rule, which was the first bundle in path order. */
 
-#include <ctype.h>
 #include <dirent.h>
 #include <errno.h>
 #include <limits.h>
@@ -14,70 +13,10 @@
 #include <string.h>
 #include <sys/stat.h>
 
+#include <plugin-hostd/protocol.h>
+
 #include "collect.h"
 #include "manifest.h"
-
-int pdb_percent_decode(const char *in, char *out, size_t size)
-{
-    size_t o = 0;
-
-    for (; *in; in++, o++)
-    {
-        int hi, lo;
-
-        if (o + 1 >= size)
-            return -1;
-        if (*in != '%')
-        {
-            out[o] = *in;
-            continue;
-        }
-        hi = isxdigit((unsigned char)in[1]) ? in[1] : -1;
-        lo = hi >= 0 && isxdigit((unsigned char)in[2]) ? in[2] : -1;
-        if (lo < 0)
-            return -1;
-        hi = hi <= '9' ? hi - '0' : (hi | 0x20) - 'a' + 10;
-        lo = lo <= '9' ? lo - '0' : (lo | 0x20) - 'a' + 10;
-        if (!(hi * 16 + lo))
-            return -1;
-        out[o] = (char)(hi * 16 + lo);
-        in += 2;
-    }
-    if (o >= size)
-        return -1;
-    out[o] = '\0';
-    return 0;
-}
-
-/* a file name as a pin holds it: '%', whitespace, the separators of a pin line and bytes outside printable ASCII as
- * %XX, which pdb_percent_decode undoes */
-static int percent_encode(const char *in, char *out, size_t size)
-{
-    static const char digits[] = "0123456789ABCDEF";
-    size_t o = 0;
-
-    for (; *in; in++)
-    {
-        unsigned char c = (unsigned char)*in;
-
-        if (c <= 0x20 || c >= 0x7f || c == '%' || c == ',' || c == '=')
-        {
-            if (o + 4 > size)
-                return -1;
-            out[o++] = '%';
-            out[o++] = digits[c >> 4];
-            out[o++] = digits[c & 15];
-        }
-        else
-        {
-            if (o + 2 > size)
-                return -1;
-            out[o++] = (char)c;
-        }
-    }
-    out[o] = '\0';
-    return 0;
-}
 
 int pdb_full_path(const char *root, const char *path, char *full, size_t size)
 {
@@ -85,7 +24,7 @@ int pdb_full_path(const char *root, const char *path, char *full, size_t size)
     const char *c;
     int slashes = 0, decoded = 0;
 
-    if (pdb_percent_decode(path, name, sizeof(name)) != 0)
+    if (phd_pin_path_decode(path, name, sizeof(name)) != 0)
         return -1;
     for (c = path; *c; c++)
         slashes += *c == '/';
@@ -290,7 +229,7 @@ static int lv2_collect(const char *uri, const char *search, pdb_collection_t *ou
     {
         char decoded[PATH_MAX];
 
-        if (pdb_percent_decode(m.files.name[n], decoded, sizeof(decoded)) != 0)
+        if (phd_pin_path_decode(m.files.name[n], decoded, sizeof(decoded)) != 0)
             rc = refuse(why, why_size, m.files.name[n], "is not a percent-encoded name");
         else if (!pdb_path_valid(m.files.name[n]))
             rc = refuse(why, why_size, m.files.name[n], "is not a file of the bundle");
@@ -306,7 +245,7 @@ static int lv2_collect(const char *uri, const char *search, pdb_collection_t *ou
 static int clap_collect(const char *file, pdb_collection_t *out, char *why, size_t why_size)
 {
     const char *slash = file ? strrchr(file, '/') : NULL;
-    char encoded[PATH_MAX];
+    char encoded[PATH_MAX * 3];
     struct stat st;
 
     if (!file || file[0] != '/' || !slash || !slash[1])
@@ -317,7 +256,7 @@ static int clap_collect(const char *file, pdb_collection_t *out, char *why, size
             snprintf(why, why_size, "%s is gone or no file", file);
         return PDB_COLLECT_ABSENT;
     }
-    if ((size_t)(slash - file) >= sizeof(out->root) || percent_encode(slash + 1, encoded, sizeof(encoded)) != 0)
+    if ((size_t)(slash - file) >= sizeof(out->root) || phd_pin_path_encode(slash + 1, encoded, sizeof(encoded)) != 0)
         return refuse(why, why_size, file, "is too long a name");
     snprintf(out->root, sizeof(out->root), "%.*s", slash == file ? 1 : (int)(slash - file), file);
     return pdb_names_add(&out->files, encoded) == 0 ? PDB_COLLECT_OK : PDB_COLLECT_ERROR;

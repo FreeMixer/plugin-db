@@ -22,6 +22,8 @@ CFLAGS ?= -O2 -g
 CFLAGS += -Wall -Wextra -std=gnu99 -D_GNU_SOURCE
 CRYPTO_CFLAGS = $(shell $(PKG_CONFIG) --cflags libcrypto)
 CRYPTO_LIBS = $(shell $(PKG_CONFIG) --libs libcrypto)
+# the pin path codec is plugin-hostd-protocol's (phd_pin_path_*, header inline): plugin-hostd-protocol-devel
+PROTOCOL_CFLAGS = $(shell $(PKG_CONFIG) --cflags plugin-hostd-protocol)
 
 # libplugin-db.a and the command plugin-db; pin.h stays header-only
 BUILD = build
@@ -29,7 +31,7 @@ LIB_SRC = src/address.c src/collect.c src/json.c src/manifest.c src/state.c src/
 LIB_OBJ = $(LIB_SRC:src/%.c=$(BUILD)/%.o)
 LIB = $(BUILD)/lib$(NAME).a
 BIN = $(BUILD)/$(NAME)
-ALL_CFLAGS = -Iinclude -Isrc $(CRYPTO_CFLAGS) $(CFLAGS) -Werror
+ALL_CFLAGS = -Iinclude -Isrc $(CRYPTO_CFLAGS) $(PROTOCOL_CFLAGS) $(CFLAGS) -Werror
 
 all: $(LIB) $(BIN)
 

@@ -8,8 +8,6 @@
 
 #include "names.h"
 
-/* in as the bytes a %XX escape stands for, into out; -1 for a bad escape, %00 or no room */
-int pdb_percent_decode(const char *in, char *out, size_t size);
 
 /* root/path as a file name, path decoded, and no '/' that was escaped; 0, or -1 */
 int pdb_full_path(const char *root, const char *path, char *full, size_t size);

@@ -43,6 +43,7 @@ arm "the version a manifest gives is not read" src/manifest.c "                o
 # the collection
 arm "a manifest's base is resolved as if none" $C "    if (m.based) => if (0)" test-collect
 arm "a name that climbs out of the bundle is taken" $C "        else if (!pdb_path_valid(m.files.name[n])) => else if (0)" test-collect
+arm "a bundle's own file:// IRI is matched as written, not decoded" src/manifest.c "    if (!strncmp(iri, \"file://\", 7) && phd_pin_path_decode(iri, decoded, sizeof(decoded)) == 0 && => if (0 &&" test-collect
 arm "a CLAP id that is a path is an address" src/address.c "(a->format == PDB_ADDRESS_FORMATS_CLAP && a->id[0] == '/') => 0" test-collect
 # the state function
 arm "a shipped refusal is not read" $S "        in->reference.verdict == PDB_PIN_VERDICTS_REFUSED) => 0)" test-state

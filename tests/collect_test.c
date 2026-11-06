@@ -237,6 +237,15 @@ static void test_collect(void)
           "a file:// name in the bundle: rc %d (%s)", rc, why);
     pdb_collection_free(&c);
 
+    /* a bundle directory with a space: its own file:// IRI writes the space %20, and the name in it is the name */
+    file("c5/my amp.lv2/manifest.ttl", PREFIXES "<" AMP "> lv2:binary <file://%s/c5/my%%20amp.lv2/amp.so> .\n", g_tmp);
+    snprintf(search, sizeof(search), "%s/c5", g_tmp);
+    rc = pdb_collect(&a, search, &c, why, sizeof(why));
+    CHECK(rc == PDB_COLLECT_OK && collected(&c, 2, "manifest.ttl", "amp.so"),
+          "a file:// name in a bundle whose directory holds a space: rc %d, %d files, the second %s (%s)", rc,
+          c.files.n, c.files.n > 1 ? c.files.name[1] : "-", why);
+    pdb_collection_free(&c);
+
     /* what cannot be pinned is refused, with its reason */
     file("c3/amp.lv2/manifest.ttl", "@base <http://example.org/> .\n" PREFIXES "<" AMP "> lv2:binary <amp.so> .\n");
     snprintf(search, sizeof(search), "%s/c3", g_tmp);

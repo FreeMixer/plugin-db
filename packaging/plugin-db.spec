@@ -1,5 +1,5 @@
 Name: plugin-db
-Version: 0.2.0
+Version: 0.2.1
 Release: 1%{?dist}
 License: GPL-3.0-or-later
 Summary: The plugin database: the pin, the address form, the store and the state
@@ -12,6 +12,7 @@ BuildRequires: make
 BuildRequires: pkgconfig
 BuildRequires: python3
 BuildRequires: pkgconfig(libcrypto)
+BuildRequires: (plugin-hostd-protocol-devel >= 0.4.1 with plugin-hostd-protocol-devel < 0.5)
 # install-contract writes the contract directory's package with omx-contract's script
 BuildRequires: (omx-contract-devel >= 3.4.0 with omx-contract-devel < 4)
 
@@ -83,6 +84,14 @@ make test
 %{_datadir}/omx-contract/contract.d/3/plugin-db
 
 %changelog
+* Fri Nov 06 2026 Pau Aliagas <linuxnow@gmail.com> - 0.2.1-1
+- A bundle directory with a space is matched against its own file:// IRI:
+  the IRI is decoded once before the match ("my amp.lv2" is my%20amp.lv2)
+- The pin path codec is plugin-hostd-protocol's phd_pin_path_encode and
+  phd_pin_path_decode; plugin-db's own pdb_percent_decode and percent_encode
+  are gone. A file name is escaped as the protocol says: a quote, a
+  backslash and control bytes too, and UTF-8 bytes no longer
+- Builds against plugin-hostd-protocol-devel >= 0.4.1 and < 0.5
 * Wed Nov 04 2026 Pau Aliagas <linuxnow@gmail.com> - 0.2.0-1
 - The address form, the file collection with the LV2 bundle rule (newest-version),
   the store of layers, the state function, and the command plugin-db with pin, put,
