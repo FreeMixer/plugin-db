@@ -1,0 +1,128 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/FreeMixer/plugin-db/raw/main/data/store.schema.json",
+  "title": "plugin-db layer file",
+  "description": "One layer of one entry of the plugin-db store, as a file. The store is a directory, per machine for system services and per user otherwise; it holds one directory per entry, and an entry holds one file per layer, named the layer's word of PLUGIN_DB_LAYERS (data/db.json) and .json. Every file is written to a temporary name in its entry's directory and renamed over its name, so a reader sees the old file or the new one, never a part. Each file records the pin it was written for, so a layer written for other bytes is found stale and never trusted. The entry is the join of its files at read time; no file holds it, and an index, if one is ever added, is derived and disposable. x-plugin-db-store states the layout; tools/render-db.py derives include/plugin-db/plugin_db_tables.h from this file and data/db.json.",
+  "x-plugin-db-store": {
+    "env": "PLUGIN_DB_STORE",
+    "systemRoot": "/var/lib/plugin-db",
+    "userStateHome": "XDG_STATE_HOME",
+    "userStateFallback": ".local/state",
+    "userDir": "plugin-db",
+    "entries": "entries",
+    "entryName": "the SHA-256 of the entry's address, 64 lowercase hex digits",
+    "layerSuffix": ".json",
+    "tempPrefix": ".tmp-",
+    "filesPinScheme": "omx-files/1",
+    "filesPin": "the SHA-256 of the line 'omx-files/1', then one line '<path>\\t<sha256>' per file in byte order of the paths, each line ending in one '\\n'",
+    "lv2DefaultSearch": "~/.lv2:/usr/local/lib/lv2:/usr/lib/lv2"
+  },
+  "type": "object",
+  "properties": {
+    "envelope": {
+      "description": "The version of this envelope: a reader refuses a file of another.",
+      "const": 1
+    },
+    "layer": {
+      "description": "The layer, a word of PLUGIN_DB_LAYERS; the file's name is this word and .json.",
+      "type": "string",
+      "pattern": "^[a-z][a-z-]*$"
+    },
+    "address": {
+      "description": "The entry's address in the one address form (PLUGIN_DB_ADDRESS_FORMATS); the entry's directory is named by its SHA-256.",
+      "type": "string",
+      "minLength": 3
+    },
+    "pin": {
+      "description": "The pin the layer was written for: the files pin, and the layout fingerprint when one was known. A layer whose files differ from the current files pin, or whose layout differs from the pinned layer's, is stale.",
+      "type": "object",
+      "properties": {
+        "files": { "$ref": "#/$defs/sha256" },
+        "layout": { "oneOf": [{ "$ref": "#/$defs/layoutPin" }, { "type": "null" }] }
+      },
+      "required": ["files", "layout"],
+      "additionalProperties": false
+    },
+    "writer": {
+      "description": "Who wrote the file, a program's name.",
+      "type": "string"
+    },
+    "body": {
+      "description": "The layer's own content. The pinned layer's is pinnedBody; the judged and reference layers carry at least recordFields, the fields the state function reads. The other layers' bodies are declared by the step that gives them a writer.",
+      "type": "object"
+    }
+  },
+  "required": ["envelope", "layer", "address", "pin", "body"],
+  "additionalProperties": false,
+  "allOf": [
+    { "if": { "properties": { "layer": { "const": "pinned" } } }, "then": { "properties": { "body": { "$ref": "#/$defs/pinnedBody" } } } },
+    { "if": { "properties": { "layer": { "const": "judged" } } }, "then": { "properties": { "body": { "$ref": "#/$defs/recordFields" } } } },
+    { "if": { "properties": { "layer": { "const": "reference" } } }, "then": { "properties": { "body": { "$ref": "#/$defs/recordFields" } } } }
+  ],
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "layoutPin": { "type": "string", "pattern": "^[^:]+:[0-9a-f]{64}$" },
+    "pinnedBody": {
+      "description": "Where the plugin's files are on this machine and what they are: the root they are relative to, each file with its digest, the layout fingerprint, the bundle rule they were collected under and, for LV2, the search path; for CLAP, the file the plugin's code is loaded from. Paths belong to this machine's store and never to an address.",
+      "type": "object",
+      "properties": {
+        "format": { "type": "string" },
+        "root": { "type": "string", "minLength": 1 },
+        "search": { "type": "string" },
+        "binary": { "type": "string" },
+        "bundleRule": { "type": "string" },
+        "files": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "properties": {
+              "path": { "type": "string", "minLength": 1 },
+              "sha256": { "$ref": "#/$defs/sha256" }
+            },
+            "required": ["path", "sha256"],
+            "additionalProperties": false
+          }
+        },
+        "layout": { "oneOf": [{ "$ref": "#/$defs/layoutPin" }, { "type": "null" }] }
+      },
+      "required": ["format", "root", "files", "layout", "bundleRule"],
+      "additionalProperties": false
+    },
+    "recordFields": {
+      "description": "The fields of a record the state function reads: the verdict (PLUGIN_DB_PIN_VERDICTS), the class of machine it was measured on, the host it was measured under with its version and hosting epoch, the judgement rules and the record schema it was written by, the cells of rate and quantum it covers and the conditions, each a fact that must hold here. Step 3 declares the whole record.",
+      "type": "object",
+      "properties": {
+        "verdict": { "type": "string" },
+        "machineClass": { "type": "string" },
+        "host": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string" },
+            "version": { "type": "string" },
+            "hostingEpoch": { "type": "integer", "minimum": 0 }
+          },
+          "required": ["name", "version", "hostingEpoch"]
+        },
+        "rules": { "type": "string" },
+        "recordSchema": { "type": "string" },
+        "cells": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "rate": { "type": "integer", "minimum": 1 },
+              "quantum": { "type": "integer", "minimum": 1 }
+            },
+            "required": ["rate", "quantum"]
+          }
+        },
+        "conditions": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        }
+      },
+      "required": ["verdict", "machineClass", "host", "rules", "recordSchema", "cells", "conditions"]
+    }
+  }
+}

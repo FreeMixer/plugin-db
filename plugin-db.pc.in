@@ -1,9 +1,11 @@
 prefix=@PREFIX@
-includedir=${prefix}/include
+includedir=@INCLUDEDIR@
+libdir=@LIBDIR@
 
 Name: plugin-db
-Description: The pin of a plugin: its key, its words and its rules
+Description: The plugin database: the pin, the address form, the files of a plugin, the store and the state
 Version: @VERSION@
-# pin.h's SHA-256 is libcrypto's (EVP_Digest): a program that includes it links libcrypto
+# pin.h's SHA-256 is libcrypto's (EVP_Digest): a program that includes it links libcrypto, and so does libplugin-db.a
 Requires: libcrypto
 Cflags: -I${includedir}
+Libs: -L${libdir} -lplugin-db

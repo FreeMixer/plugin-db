@@ -1,0 +1,51 @@
+.TH PLUGIN-DB 1 "" "plugin-db" "User Commands"
+.SH NAME
+plugin-db \- pin, show and verify the entries of the plugin database
+.SH SYNOPSIS
+.B plugin-db
+[\fB\-\-store\fR \fIdir\fR | \fB\-\-system\fR] \fBpin\fR \fIaddress\fR [\fB\-\-lv2\-path\fR \fIpath\fR | \fB\-\-file\fR \fIfile.clap\fR] [\fB\-\-layout\fR \fIscheme\fR:\fIsha256\fR]
+.br
+.B plugin-db
+[\fB\-\-store\fR \fIdir\fR | \fB\-\-system\fR] \fBput\fR \fIaddress\fR \fIlayer\fR [\fB\-\-writer\fR \fIname\fR] < body.json
+.br
+.B plugin-db
+[\fB\-\-store\fR \fIdir\fR | \fB\-\-system\fR] \fBshow\fR \fIaddress\fR [\fIhere\fR] [\fB\-\-layout\fR \fIscheme\fR:\fIsha256\fR]
+.br
+.B plugin-db
+[\fB\-\-store\fR \fIdir\fR | \fB\-\-system\fR] \fBverify\fR [\fB\-v\fR] [\fIhere\fR]
+.SH DESCRIPTION
+.B plugin-db
+keeps one entry for each plugin in a store of layer files. It loads no plugin: it reads LV2 manifests as text and hashes files.
+.PP
+An address is \fIformat\fR:\fIid\fR, or \fBclap@\fR\fIsha256\fR:\fIid\fR when several files share one CLAP id. The format is
+\fBclap\fR or \fBlv2\fR.
+.TP
+.B pin
+Records the plugin's files and parameter layout in the entry. A CLAP plugin is given with \fB\-\-file\fR; an LV2 plugin is
+found in \fB\-\-lv2\-path\fR, else LV2_PATH, else ~/.lv2:/usr/local/lib/lv2:/usr/lib/lv2.
+.TP
+.B put
+Writes the layer read from standard input, checked against the store's schema.
+.TP
+.B show
+Prints the attributes, the change and its action, the state, how the plugin runs, the reason, the source, the verdict and
+what it was measured under.
+.TP
+.B verify
+Checks every entry as rpm \-V does: one line for each entry that is not current, and exit status 1 when there is one.
+\fB\-v\fR prints every entry.
+.PP
+\fIhere\fR is \fB\-\-machine\-class\fR, \fB\-\-host\fR, \fB\-\-host\-version\fR, \fB\-\-hosting\-epoch\fR, \fB\-\-rules\fR,
+\fB\-\-record\-schema\fR, \fB\-\-rate\fR, \fB\-\-quantum\fR and \fB\-\-fact\fR \fIkey\fR=\fIvalue\fR. A fact not given is not
+known, and no record matches it.
+.SH FILES
+.TP
+.I $PLUGIN_DB_STORE
+The store. Otherwise /var/lib/plugin-db with \fB\-\-system\fR, else $XDG_STATE_HOME/plugin-db (~/.local/state/plugin-db).
+.TP
+.I /usr/share/plugin-db/store.schema.json
+The JSON Schema of a layer file.
+.SH EXIT STATUS
+0 on success, 1 when \fBverify\fR finds an entry that is not current or a command fails, 2 on a usage error.
+.SH LICENSE
+GPL-3.0-or-later.

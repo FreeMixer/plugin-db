@@ -15,14 +15,27 @@ Vcs-Git: https://github.com/FreeMixer/plugin-db.git
 Vcs-Browser: https://github.com/FreeMixer/plugin-db
 Rules-Requires-Root: no
 
+Package: plugin-db
+Section: utils
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: plugin database: pin, show and verify plugins
+ The command plugin-db pins an entry of the plugin database from the plugin's
+ files, shows one entry's attributes, state and reason, and verifies every
+ entry as rpm -V does, with the JSON Schema of the store's layer files. It
+ loads no plugin.
+ .
+ Its documentation is on openmixer.org.
+
 Package: plugin-db-dev
-Architecture: all
-Multi-Arch: foreign
+Architecture: any
 Depends: libssl-dev, ${misc:Depends}
-Description: pin of a plugin: one header and its pkg-config file
+Description: plugin database: headers, static library and pkg-config file
  <plugin-db/pin.h>, header-only, on libc and libcrypto: the SHA-256 of a file,
  the omx-layout/1 fingerprint of a parameter layout, the words a pin is written
- with and the rules of what is a pin's, with the pkg-config file plugin-db.
+ with and the rules of what is a pin's. <plugin-db/db.h> and libplugin-db.a:
+ the address form, the file collection with the LV2 bundle rule, the store of
+ layers and the state function. With the pkg-config file plugin-db.
  .
  Its documentation is on openmixer.org.
 
@@ -31,9 +44,10 @@ Section: libs
 Architecture: all
 Multi-Arch: foreign
 Depends: omx-contract (>= 3.2.0~), omx-contract (<< 4~), ${misc:Depends}
-Description: words of a plugin pin in omx-contract's contract directory
- data/pin.json of plugin-db, the verdicts, the pool words, the optional keys,
- what counts as changed and the layout formats, as the package plugin-db of
+Description: words of the plugin database in omx-contract's contract directory
+ data/pin.json of plugin-db, the words of a pin, and data/db.json, the address
+ formats, the bundle rule, the layers, the attributes, the record changes and
+ their actions, the states and the reasons, as the package plugin-db of
  omx-contract's contract directory, under
  /usr/share/omx-contract/contract.d/3/plugin-db.
  .
