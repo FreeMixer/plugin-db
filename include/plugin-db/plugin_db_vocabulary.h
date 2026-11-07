@@ -125,6 +125,20 @@
 #define OMX_PLUGIN_DB_SOURCES_COUNT 3u
 #define OMX_PLUGIN_DB_SOURCES_INIT { "none", "local", "reference" }
 
+/* PLUGIN_DB_BAR (data/db.json) */
+#define OMX_PLUGIN_DB_BAR_QUALIFIED_ONLY "qualified-only" ///< only plugins whose state is qualified are offered by default
+#define OMX_PLUGIN_DB_BAR_WARN_ON_CRASHES "warn-on-crashes" ///< every plugin that is not refused or absent is offered, and only a crash is asked about
+#define OMX_PLUGIN_DB_BAR_LOAD_ALL "load-all" ///< every plugin is offered, the way back from a refusal included
+#define OMX_PLUGIN_DB_BAR_COUNT 3u
+#define OMX_PLUGIN_DB_BAR_INIT { "qualified-only", "warn-on-crashes", "load-all" }
+
+/* PLUGIN_DB_LATENCY (data/db.json) */
+#define OMX_PLUGIN_DB_LATENCY_WITHIN "within" ///< the figure is at or under the line
+#define OMX_PLUGIN_DB_LATENCY_OVER "over" ///< the figure is over the line: shown by the owner's text, and the plugin loads
+#define OMX_PLUGIN_DB_LATENCY_UNMEASURED "unmeasured" ///< the record has no line, or the cell has no figure
+#define OMX_PLUGIN_DB_LATENCY_COUNT 3u
+#define OMX_PLUGIN_DB_LATENCY_INIT { "within", "over", "unmeasured" }
+
 /* PLUGIN_DB_PIN_VERDICTS (data/pin.json) */
 #define OMX_PLUGIN_DB_PIN_VERDICTS_IN_PROCESS "in-process" ///< qualified to run in a worker that other plugins share
 #define OMX_PLUGIN_DB_PIN_VERDICTS_ISOLATED "isolated" ///< qualified to run, in a worker of its own

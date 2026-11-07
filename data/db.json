@@ -383,5 +383,43 @@
         "doc": "the reference layer: a shipped record, measured on a reference machine"
       }
     }
+  },
+  "PLUGIN_DB_BAR": {
+    "kind": "words",
+    "since": "0.3.0",
+    "doc": "The bar a person sets for what may load, a user setting on both surfaces whose three words are declared here and read by plugin-hostd and both surfaces: the picker's and the menu's default view follow it. It filters a view and never changes what the reader answers; a refused plugin stays listed with its reason.",
+    "words": {
+      "qualifiedOnly": {
+        "word": "qualified-only",
+        "doc": "only plugins whose state is qualified are offered by default"
+      },
+      "warnOnCrashes": {
+        "word": "warn-on-crashes",
+        "doc": "every plugin that is not refused or absent is offered, and only a crash is asked about"
+      },
+      "loadAll": {
+        "word": "load-all",
+        "doc": "every plugin is offered, the way back from a refusal included"
+      }
+    }
+  },
+  "PLUGIN_DB_LATENCY": {
+    "kind": "words",
+    "since": "0.3.0",
+    "doc": "Where a measured latency figure stands against the latency line, which plugin-qualify's judgement declares once and writes into the record as latencyLineMs beside the figure of each cell as latencyMs. Over the line is information: the plugin loads. A record without the line, or a cell without the figure, is unmeasured and never a guess.",
+    "words": {
+      "within": {
+        "word": "within",
+        "doc": "the figure is at or under the line"
+      },
+      "over": {
+        "word": "over",
+        "doc": "the figure is over the line: shown by the owner's text, and the plugin loads"
+      },
+      "unmeasured": {
+        "word": "unmeasured",
+        "doc": "the record has no line, or the cell has no figure"
+      }
+    }
   }
 }

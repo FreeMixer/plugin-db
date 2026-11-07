@@ -1,0 +1,73 @@
+{
+  "name": "reference-other-class",
+  "about": "4.5 pin matches, other machine class: reference figures only",
+  "cli": true,
+  "pinned": true,
+  "pinnedLayout": true,
+  "files": "same",
+  "currentLayout": "none",
+  "layers": {
+    "reference": {
+      "pin": "current",
+      "body": {
+        "verdict": "in-process",
+        "machineClass": "rpi5",
+        "host": {
+          "name": "plugin-hostd",
+          "version": "1.4.0",
+          "hostingEpoch": 2
+        },
+        "rules": "rules-7",
+        "recordSchema": "record-3",
+        "cells": [
+          {
+            "rate": 48000,
+            "quantum": 128,
+            "latencyMs": 1.5
+          },
+          {
+            "rate": 48000,
+            "quantum": 256
+          }
+        ],
+        "conditions": {
+          "cpu": "cortex-a76"
+        },
+        "latencyLineMs": 3
+      }
+    }
+  },
+  "here": {
+    "machineClass": "x86-64-v3",
+    "hostName": "plugin-hostd",
+    "hostVersion": "1.4.0",
+    "hostingEpoch": 2,
+    "rules": "rules-7",
+    "recordSchema": "record-3",
+    "rate": 48000,
+    "quantum": 128,
+    "facts": [
+      "kernel=rt",
+      "cpu=cortex-a76"
+    ]
+  },
+  "expect": {
+    "files": "same",
+    "layout": "same",
+    "record": "none",
+    "change": null,
+    "action": null,
+    "tier": "in-process",
+    "figures": {
+      "rate": 48000,
+      "quantum": 128,
+      "latencyMs": 1.5,
+      "lineMs": 3,
+      "standing": "within"
+    },
+    "state": "isolated-only",
+    "runs": "alone",
+    "reason": "reference-only",
+    "source": "reference"
+  }
+}

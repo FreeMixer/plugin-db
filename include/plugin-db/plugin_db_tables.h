@@ -176,6 +176,22 @@ enum {
 };
 #define PDB_SOURCES_COUNT 3
 
+/* PLUGIN_DB_BAR */
+enum {
+    PDB_BAR_QUALIFIED_ONLY = 0,
+    PDB_BAR_WARN_ON_CRASHES = 1,
+    PDB_BAR_LOAD_ALL = 2,
+};
+#define PDB_BAR_COUNT 3
+
+/* PLUGIN_DB_LATENCY */
+enum {
+    PDB_LATENCY_WITHIN = 0,
+    PDB_LATENCY_OVER = 1,
+    PDB_LATENCY_UNMEASURED = 2,
+};
+#define PDB_LATENCY_COUNT 3
+
 /* the PLUGIN_DB_RECORD index of each word of PLUGIN_DB_RECORD_ACTIONS */
 #define PDB_RECORD_ACTIONS_GROUP_INIT { 1, 1, 1, 1, 0 }
 
@@ -215,6 +231,8 @@ enum {
 #define PDB_KEY_FORMAT "format"
 #define PDB_KEY_HOST "host"
 #define PDB_KEY_HOSTING_EPOCH "hostingEpoch"
+#define PDB_KEY_LATENCY_LINE_MS "latencyLineMs"
+#define PDB_KEY_LATENCY_MS "latencyMs"
 #define PDB_KEY_LAYER "layer"
 #define PDB_KEY_LAYOUT "layout"
 #define PDB_KEY_MACHINE_CLASS "machineClass"

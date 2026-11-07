@@ -12,6 +12,9 @@ plugin-db \- pin, show and verify the entries of the plugin database
 [\fB\-\-store\fR \fIdir\fR | \fB\-\-system\fR] \fBshow\fR \fIaddress\fR [\fIhere\fR] [\fB\-\-layout\fR \fIscheme\fR:\fIsha256\fR]
 .br
 .B plugin-db
+[\fB\-\-store\fR \fIdir\fR | \fB\-\-system\fR] \fBquery \-\-json\fR \fIaddress\fR [\fIhere\fR] [\fB\-\-layout\fR \fIscheme\fR:\fIsha256\fR]
+.br
+.B plugin-db
 [\fB\-\-store\fR \fIdir\fR | \fB\-\-system\fR] \fBverify\fR [\fB\-v\fR] [\fIhere\fR]
 .SH DESCRIPTION
 .B plugin-db
@@ -30,6 +33,14 @@ Writes the layer read from standard input, checked against the store's schema.
 .B show
 Prints the attributes, the change and its action, the state, how the plugin runs, the reason, the source, the verdict and
 what it was measured under.
+.TP
+.B query \-\-json
+Prints the same answer as one JSON object for scripts and the Zynthian side: the files, layout and record attributes,
+the change and its action (or null), the state, how the plugin runs, the reason and the source, the record's tier (the
+record's verdict when it says where the plugin runs, else null) and the figures at the rate and quantum given: the
+latency measured there, the latency line the record declares, and where one stands against the other (within, over or
+unmeasured). A record without the line, or a cell without the figure, is unmeasured. Nothing is computed beyond the
+reader's answer; the TypeScript twin gives the same.
 .TP
 .B verify
 Checks every entry as rpm \-V does: one line for each entry that is not current, and exit status 1 when there is one.

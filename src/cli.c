@@ -20,6 +20,8 @@ static const char *const g_runs[] = OMX_PLUGIN_DB_RUNS_INIT;
 static const char *const g_reasons[] = OMX_PLUGIN_DB_REASONS_INIT;
 static const char *const g_sources[] = OMX_PLUGIN_DB_SOURCES_INIT;
 static const char *const g_layers[] = OMX_PLUGIN_DB_LAYERS_INIT;
+static const char *const g_verdicts[] = OMX_PLUGIN_DB_PIN_VERDICTS_INIT;
+static const char *const g_standings[] = OMX_PLUGIN_DB_LATENCY_INIT;
 
 #define WORD(table, item, index) pdb_word(table, PDB_##item##_COUNT, index)
 
@@ -29,6 +31,7 @@ static int usage(void)
           "                 [--layout <scheme>:<sha256>]\n"
           "       plugin-db [--store <dir> | --system] put <address> <layer> [--writer <name>] < body.json\n"
           "       plugin-db [--store <dir> | --system] show <address> [<here>] [--layout <scheme>:<sha256>]\n"
+          "       plugin-db [--store <dir> | --system] query --json <address> [<here>] [--layout <scheme>:<sha256>]\n"
           "       plugin-db [--store <dir> | --system] verify [-v] [<here>]\n"
           "  <address>  <format>:<id> or <format>@<sha256>:<id>, a format of PLUGIN_DB_ADDRESS_FORMATS\n"
           "  <here>     --machine-class <class> --host <name> --host-version <version> --hosting-epoch <n>\n"
@@ -154,6 +157,85 @@ static int show(const char *store, const char *address, const opts_t *o)
     return 0;
 }
 
+static void json_string(const char *s)
+{
+    putchar('"');
+    for (; *s; s++)
+    {
+        unsigned char c = (unsigned char)*s;
+
+        if (c == '"' || c == '\\')
+            printf("\\%c", c);
+        else if (c < 0x20)
+            printf("\\u%04x", c);
+        else
+            putchar(c);
+    }
+    putchar('"');
+}
+
+static void json_word_or_null(const char *word)
+{
+    if (word)
+        json_string(word);
+    else
+        fputs("null", stdout);
+}
+
+static void json_number_or_null(int has, double n)
+{
+    if (has)
+        printf("%.17g", n);
+    else
+        fputs("null", stdout);
+}
+
+/* the one reader's answer as JSON, for scripts and the Zynthian side: the attributes, state, run, reason and source
+ * of show, the record's tier, and the figure at the rate and quantum here. Nothing is computed here: every word is
+ * the state function's or the record's, and the standing is pdb_latency_standing's. */
+static int query(const char *store, const char *address, const opts_t *o)
+{
+    char why[PDB_PATH_MAX];
+    const char *tier = NULL;
+    pdb_answer_t a;
+    pdb_detail_t d;
+    int k;
+
+    if (pdb_check(store, address, &o->here, o->layout, &a, &d, why, sizeof(why)) != 0)
+    {
+        fprintf(stderr, "plugin-db: %s\n", why);
+        return 1;
+    }
+    /* the tier is the answering record's verdict when it says where the plugin runs; a refusal has none */
+    for (k = 0; k < PDB_PIN_VERDICTS_COUNT; k++)
+        if (a.source != PDB_SOURCES_NONE && k != PDB_PIN_VERDICTS_REFUSED && !strcmp(d.verdict, g_verdicts[k]))
+            tier = g_verdicts[k];
+    fputs("{\"address\": ", stdout);
+    json_string(d.address);
+    printf(", \"files\": \"%s\", \"layout\": \"%s\", \"record\": \"%s\", \"change\": ", WORD(g_files, FILES, a.files),
+           WORD(g_layout, LAYOUT, a.layout), WORD(g_record, RECORD, a.record));
+    json_word_or_null(a.change >= 0 ? WORD(g_changes, RECORD_CHANGES, a.change) : NULL);
+    fputs(", \"action\": ", stdout);
+    json_word_or_null(a.change >= 0 ? WORD(g_actions, RECORD_ACTIONS, a.action) : NULL);
+    printf(", \"state\": \"%s\", \"runs\": \"%s\", \"reason\": \"%s\", \"source\": \"%s\", \"tier\": ",
+           WORD(g_states, STATES, a.state), WORD(g_runs, RUNS, a.runs), WORD(g_reasons, REASONS, a.reason),
+           WORD(g_sources, SOURCES, a.source));
+    json_word_or_null(tier);
+    fputs(", \"figures\": ", stdout);
+    if (tier && d.has_cell)
+    {
+        printf("{\"rate\": %ld, \"quantum\": %ld, \"latencyMs\": ", d.rate, d.quantum);
+        json_number_or_null(d.has_latency, d.latency_ms);
+        fputs(", \"lineMs\": ", stdout);
+        json_number_or_null(d.has_line, d.line_ms);
+        printf(", \"standing\": \"%s\"}", WORD(g_standings, LATENCY, d.standing));
+    }
+    else
+        fputs("null", stdout);
+    puts("}");
+    return 0;
+}
+
 typedef struct VERIFY_T {
     const char *store;
     const opts_t *o;
@@ -253,6 +335,15 @@ int main(int argc, char **argv)
         if (options(argc - n, argv + n, &o) != 0)
             return usage();
         return show(store, address, &o);
+    }
+    if (!strcmp(verb, "query") && n + 1 < argc && !strcmp(argv[n], "--json"))
+    {
+        const char *address = argv[n + 1];
+
+        n += 2;
+        if (options(argc - n, argv + n, &o) != 0)
+            return usage();
+        return query(store, address, &o);
     }
     if (!strcmp(verb, "verify"))
     {

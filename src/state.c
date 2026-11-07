@@ -207,3 +207,10 @@ void pdb_state(const pdb_state_in_t *in, const pdb_here_t *here, pdb_answer_t *o
     }
     answer(out, PDB_STATES_QUALIFIED, PDB_REASONS_VERDICT_ALLOWS, source);
 }
+
+int pdb_latency_standing(int has_latency, double latency_ms, int has_line, double line_ms)
+{
+    if (!has_latency || !has_line)
+        return PDB_LATENCY_UNMEASURED;
+    return latency_ms > line_ms ? PDB_LATENCY_OVER : PDB_LATENCY_WITHIN;
+}

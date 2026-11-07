@@ -1,0 +1,37 @@
+{
+  "name": "measurement-pending",
+  "about": "4.2 unqualified: pinned, no record yet",
+  "cli": true,
+  "pinned": true,
+  "pinnedLayout": true,
+  "files": "same",
+  "currentLayout": "none",
+  "layers": {},
+  "here": {
+    "machineClass": "rpi5",
+    "hostName": "plugin-hostd",
+    "hostVersion": "1.4.0",
+    "hostingEpoch": 2,
+    "rules": "rules-7",
+    "recordSchema": "record-3",
+    "rate": 48000,
+    "quantum": 128,
+    "facts": [
+      "kernel=rt",
+      "cpu=cortex-a76"
+    ]
+  },
+  "expect": {
+    "files": "same",
+    "layout": "same",
+    "record": "none",
+    "change": null,
+    "action": null,
+    "tier": null,
+    "figures": null,
+    "state": "unqualified",
+    "runs": "alone",
+    "reason": "measurement-pending",
+    "source": "none"
+  }
+}

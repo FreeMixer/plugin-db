@@ -112,7 +112,8 @@
             "type": "object",
             "properties": {
               "rate": { "type": "integer", "minimum": 1 },
-              "quantum": { "type": "integer", "minimum": 1 }
+              "quantum": { "type": "integer", "minimum": 1 },
+              "latencyMs": { "description": "The latency measured at this rate and quantum, in milliseconds; a cell without it is unmeasured (PLUGIN_DB_LATENCY).", "type": "number", "minimum": 0 }
             },
             "required": ["rate", "quantum"]
           }
@@ -120,7 +121,8 @@
         "conditions": {
           "type": "object",
           "additionalProperties": { "type": "string" }
-        }
+        },
+        "latencyLineMs": { "description": "The latency line, in milliseconds, as plugin-qualify's judgement declared it, written beside the figure of each cell; a record without it is unmeasured against any line (PLUGIN_DB_LATENCY). The reader never supplies one.", "type": "number", "exclusiveMinimum": 0 }
       },
       "required": ["verdict", "machineClass", "host", "rules", "recordSchema", "cells", "conditions"]
     }

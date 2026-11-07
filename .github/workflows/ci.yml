@@ -45,6 +45,27 @@ jobs:
       - name: The C tests and the command under AddressSanitizer and UBSan
         run: make test-asan
 
+  # The reader's TypeScript twin: its tests over tests/golden/, the same fixtures `plugin-db query --json` is held to, the
+  # conformance check of the sources and the arms that must turn them red. Node is the distribution's, not installed
+  # from a package manager: the twin has no dependency.
+  twin:
+    name: reader twin (node)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    container: fedora:44
+    steps:
+      - name: Toolchain
+        run: dnf -y install gcc make pkgconf-pkg-config openssl-devel python3 diffutils nodejs
+      - uses: actions/checkout@v4
+      - name: Add the OpenMixer channel
+        uses: FreeMixer/.github/.github/actions/add-openmixer@v1
+      - name: plugin-hostd-protocol's headers
+        run: dnf -y install 'plugin-hostd-protocol-devel >= 0.4.1' 'plugin-hostd-protocol-devel < 0.5'
+      - name: Node is in the twin's range
+        run: node -e 'const [a,b]=process.versions.node.split(".").map(Number); if (a>=25 || a<22 || (a==22 && b<18)) { console.error("node " + process.version + " is outside 22.18 .. 24"); process.exit(1) }'
+      - name: make test-twin
+        run: make test-twin
+
   # The declared words, with the tools a package build does not carry: the rendered header is what the installed
   # omx-contract renders from data/ (and a header changed by hand is red), and data/ as a package validates.
   words:
