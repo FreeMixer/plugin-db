@@ -64,6 +64,16 @@ arm "a record binds no layout" $T "    r->pin_layout = pinned->tree && => r->pin
 arm "a layer is written in place" $T "    if (rename(temp, path) != 0) => if (0)" test-store
 arm "an entry is named by its address as written" $T "    if (phd_sha256_hex(address, strlen(address), hex) != 0) => snprintf(hex, sizeof(hex), \"%.64s\", address); if (0)" test-store
 arm "a pin a CLAP address gives is not checked" $T "    if (a.format == PDB_ADDRESS_FORMATS_CLAP && a.pin[0] && strcmp(a.pin, files[0].sha256)) => if (0)" test-store
+# the reader's answer through `query --json`
+arm "a figure at the line is over it" $S "    return latency_ms > line_ms ? => return latency_ms >= line_ms ?" test-golden
+arm "a missing line is guessed within" $S "    if (!has_latency || !has_line) => if (!has_latency)" test-golden
+arm "a refusal has a tier" src/cli.c "k != PDB_PIN_VERDICTS_REFUSED && => " test-golden
+arm "the figure is the cell of another quantum" $T "(long)quantum->number != here->quantum || here->rate <= 0 => 0 || here->rate <= 0" test-golden
+arm "the figure of a record that does not answer" $T "answer->source == PDB_SOURCES_NONE ? NULL : => " test-golden
+arm "the tier of a reference record is not read" $T "out->source == PDB_SOURCES_REFERENCE ? reference.body : local.body, out, here, detail => local.body, out, here, detail" test-golden
+arm "a word of the run renamed in the generated vocabulary" include/plugin-db/plugin_db_vocabulary.h '#define OMX_PLUGIN_DB_RUNS_INIT { "shared", "alone", => #define OMX_PLUGIN_DB_RUNS_INIT { "shared", "solo",' test-golden
+arm "a reason renamed in the generated vocabulary" include/plugin-db/plugin_db_vocabulary.h '"condition-fails", => "condition-breaks",' test-golden
+arm "a field of the answer is dropped" src/cli.c '\"tier\": => \"tyer\": ' test-golden
 # the derivation from data/
 arm "data/ changed and plugin_db_tables.h not rendered" data/db.json '"group": "rejudge", => "group": "convert",' check-tables
 arm "a store key changed in the schema and not rendered" data/store.schema.json '"entries": "entries", => "entries": "entry",' check-tables

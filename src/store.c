@@ -795,6 +795,36 @@ static void record_drop(record_store_t *keep)
     free(keep->cells);
 }
 
+/* the figure of the answering record's cell at the rate and quantum here, and the line it declares */
+static void figures_of(const pdb_json_t *body, const pdb_answer_t *answer, const pdb_here_t *here, pdb_detail_t *d)
+{
+    const pdb_json_t *cells = answer->source == PDB_SOURCES_NONE ? NULL : pdb_json_get(body, PDB_KEY_CELLS);
+    const pdb_json_t *line = pdb_json_get(body, PDB_KEY_LATENCY_LINE_MS);
+    size_t n;
+
+    d->standing = PDB_LATENCY_UNMEASURED;
+    for (n = 0; cells && cells->type == PDB_JSON_ARRAY && n < cells->count; n++)
+    {
+        const pdb_json_t *rate = pdb_json_get(cells->items[n], PDB_KEY_RATE);
+        const pdb_json_t *quantum = pdb_json_get(cells->items[n], PDB_KEY_QUANTUM);
+        const pdb_json_t *ms = pdb_json_get(cells->items[n], PDB_KEY_LATENCY_MS);
+
+        if (!rate || !quantum || rate->type != PDB_JSON_NUMBER || quantum->type != PDB_JSON_NUMBER ||
+            (long)rate->number != here->rate || (long)quantum->number != here->quantum || here->rate <= 0 ||
+            here->quantum <= 0)
+            continue;
+        d->has_cell = 1;
+        d->rate = here->rate;
+        d->quantum = here->quantum;
+        d->has_latency = ms && ms->type == PDB_JSON_NUMBER;
+        d->latency_ms = d->has_latency ? ms->number : 0;
+        d->has_line = line && line->type == PDB_JSON_NUMBER;
+        d->line_ms = d->has_line ? line->number : 0;
+        d->standing = pdb_latency_standing(d->has_latency, d->latency_ms, d->has_line, d->line_ms);
+        return;
+    }
+}
+
 /* the files attribute: the plugin collected again where the pinned layer says, and every file hashed again */
 static int files_check(const char *address, const layer_t *pinned, char *problem, size_t size)
 {
@@ -933,6 +963,7 @@ int pdb_check(const char *store, const char *text, const pdb_here_t *here, const
         snprintf(detail->machine_class, sizeof(detail->machine_class), "%s",
                  (s = pdb_json_string(out->source == PDB_SOURCES_REFERENCE ? reference.body : local.body,
                                       PDB_KEY_MACHINE_CLASS)) ? s : "");
+        figures_of(out->source == PDB_SOURCES_REFERENCE ? reference.body : local.body, out, here, detail);
         snprintf(detail->host_name, sizeof(detail->host_name), "%s", (s = pdb_json_string(host, PDB_KEY_NAME)) ? s : "");
         snprintf(detail->host_version, sizeof(detail->host_version), "%s",
                  (s = pdb_json_string(host, PDB_KEY_VERSION)) ? s : "");

@@ -1,0 +1,72 @@
+{
+  "name": "conditions-fail",
+  "about": "4.2 conditions unmet: a condition fails here",
+  "cli": true,
+  "pinned": true,
+  "pinnedLayout": true,
+  "files": "same",
+  "currentLayout": "none",
+  "layers": {
+    "judged": {
+      "pin": "current",
+      "body": {
+        "verdict": "in-process",
+        "machineClass": "rpi5",
+        "host": {
+          "name": "plugin-hostd",
+          "version": "1.4.0",
+          "hostingEpoch": 2
+        },
+        "rules": "rules-7",
+        "recordSchema": "record-3",
+        "cells": [
+          {
+            "rate": 48000,
+            "quantum": 128,
+            "latencyMs": 1.5
+          },
+          {
+            "rate": 48000,
+            "quantum": 256
+          }
+        ],
+        "conditions": {
+          "cpu": "cortex-a76"
+        },
+        "latencyLineMs": 3
+      }
+    }
+  },
+  "here": {
+    "machineClass": "rpi5",
+    "hostName": "plugin-hostd",
+    "hostVersion": "1.4.0",
+    "hostingEpoch": 2,
+    "rules": "rules-7",
+    "recordSchema": "record-3",
+    "rate": 48000,
+    "quantum": 128,
+    "facts": [
+      "cpu=cortex-a72"
+    ]
+  },
+  "expect": {
+    "files": "same",
+    "layout": "same",
+    "record": "current",
+    "change": null,
+    "action": null,
+    "tier": "in-process",
+    "figures": {
+      "rate": 48000,
+      "quantum": 128,
+      "latencyMs": 1.5,
+      "lineMs": 3,
+      "standing": "within"
+    },
+    "state": "conditions-unmet",
+    "runs": "alone",
+    "reason": "condition-fails",
+    "source": "local"
+  }
+}

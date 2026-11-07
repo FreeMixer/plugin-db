@@ -70,6 +70,8 @@ plugin-db pin clap:com.example.synth --file /usr/lib/clap/synth.clap
 plugin-db put lv2:http://example.org/amp judged --writer plugin-qualify < record.json
 plugin-db show lv2:http://example.org/amp --machine-class rpi5 --host plugin-hostd --host-version 1.4.0 \
     --hosting-epoch 2 --rules rules-7 --record-schema record-3 --rate 48000 --quantum 128
+plugin-db query --json lv2:http://example.org/amp --machine-class rpi5 --host plugin-hostd --host-version 1.4.0 \
+    --hosting-epoch 2 --rules rules-7 --record-schema record-3 --rate 48000 --quantum 128
 plugin-db verify
 ```
 
@@ -77,6 +79,20 @@ plugin-db verify
 and what it was measured under, and the first thing the check found. `verify` checks every entry as `rpm -V` does: one
 line for each entry that is not files same, layout same and record current, and exit 1 when there is one (`-v` prints
 every entry). A fact of here that is not given is not known, and no record matches it: could not test is never passed.
+
+`query --json` gives the same answer as one JSON object for scripts and Zynthian, with the record's tier and the figures
+at the rate and quantum: the latency measured there, the latency line the record declares (plugin-qualify's judgement
+writes it beside the figure of each cell) and whether the figure is within it, over it or unmeasured. A record that
+lacks the line or the figure is unmeasured; the reader never guesses one. Over the line is information: the plugin
+loads. The bar a person sets for what may load (qualified-only, warn-on-crashes, load-all) is declared in `data/db.json`
+and read from there by plugin-hostd and the surfaces.
+
+The console reads the TypeScript twin in `ts/` (`ts/src/reader.ts`, with its words generated from `data/` into
+`ts/src/vocabulary.ts` by `make render-ts`). It is given the entry's layers and what the check found of the files, and
+answers as the C reader does. `tests/golden/` holds one fixture for each state of the spec, and the way to it, that
+`plugin-db query --json` (`make test-golden`) and the twin (`make test-twin`, node 22.18 or later, below 25) must both
+answer exactly. No source types a state, run, reason, tier, bar or standing word, or a sentence of `data/`; the
+conformance test in `ts/test/` refuses it.
 
 A C program includes `<plugin-db/db.h>` (and `<plugin-db/pin.h>`, which it includes) and links `libplugin-db.a`:
 
@@ -113,6 +129,7 @@ make install PREFIX=/usr/local
 derived from `data/`, the state function by table (every state, reason, change and action reached by a fixture), the
 address form, the bundle rule and the collection over fixture bundles, the store, `show` and `verify` through the
 command, a consumer of an install, and the sabotage arms, each of which breaks one rule and must go red.
+`make test-twin` runs the twin's tests and the arms that must turn them red.
 `make test-asan` runs the C tests and the command under AddressSanitizer and UBSan. `make check-tools` also holds the
 rendered vocabulary header to `data/` and validates the package against the contract directory; it needs omx-contract
 and omx-contract-devel. After a change to `data/`, `make render-words render-tables` renders both headers again.

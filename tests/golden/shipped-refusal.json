@@ -1,0 +1,100 @@
+{
+  "name": "shipped-refusal",
+  "about": "a shipped refusal wins over everything, a warned override included",
+  "cli": true,
+  "pinned": true,
+  "pinnedLayout": true,
+  "files": "same",
+  "currentLayout": "none",
+  "layers": {
+    "judged": {
+      "pin": "current",
+      "body": {
+        "verdict": "in-process",
+        "machineClass": "rpi5",
+        "host": {
+          "name": "plugin-hostd",
+          "version": "1.4.0",
+          "hostingEpoch": 2
+        },
+        "rules": "rules-7",
+        "recordSchema": "record-3",
+        "cells": [
+          {
+            "rate": 48000,
+            "quantum": 128,
+            "latencyMs": 1.5
+          },
+          {
+            "rate": 48000,
+            "quantum": 256
+          }
+        ],
+        "conditions": {
+          "cpu": "cortex-a76"
+        },
+        "latencyLineMs": 3
+      }
+    },
+    "reference": {
+      "pin": "current",
+      "body": {
+        "verdict": "refused",
+        "machineClass": "rpi5",
+        "host": {
+          "name": "plugin-hostd",
+          "version": "1.4.0",
+          "hostingEpoch": 2
+        },
+        "rules": "rules-7",
+        "recordSchema": "record-3",
+        "cells": [
+          {
+            "rate": 48000,
+            "quantum": 128,
+            "latencyMs": 1.5
+          },
+          {
+            "rate": 48000,
+            "quantum": 256
+          }
+        ],
+        "conditions": {
+          "cpu": "cortex-a76"
+        },
+        "latencyLineMs": 3
+      }
+    },
+    "warned-override": {
+      "pin": "current",
+      "body": {}
+    }
+  },
+  "here": {
+    "machineClass": "rpi5",
+    "hostName": "plugin-hostd",
+    "hostVersion": "1.4.0",
+    "hostingEpoch": 2,
+    "rules": "rules-7",
+    "recordSchema": "record-3",
+    "rate": 48000,
+    "quantum": 128,
+    "facts": [
+      "kernel=rt",
+      "cpu=cortex-a76"
+    ]
+  },
+  "expect": {
+    "files": "same",
+    "layout": "same",
+    "record": "current",
+    "change": null,
+    "action": null,
+    "tier": null,
+    "figures": null,
+    "state": "refused",
+    "runs": "not-loaded",
+    "reason": "shipped-refusal",
+    "source": "reference"
+  }
+}

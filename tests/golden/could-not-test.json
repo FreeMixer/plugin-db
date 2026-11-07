@@ -1,0 +1,67 @@
+{
+  "name": "could-not-test",
+  "about": "the files could not be read: never passed",
+  "cli": false,
+  "pinned": true,
+  "pinnedLayout": true,
+  "files": "could-not-test",
+  "currentLayout": "none",
+  "layers": {
+    "judged": {
+      "pin": "current",
+      "body": {
+        "verdict": "in-process",
+        "machineClass": "rpi5",
+        "host": {
+          "name": "plugin-hostd",
+          "version": "1.4.0",
+          "hostingEpoch": 2
+        },
+        "rules": "rules-7",
+        "recordSchema": "record-3",
+        "cells": [
+          {
+            "rate": 48000,
+            "quantum": 128,
+            "latencyMs": 1.5
+          },
+          {
+            "rate": 48000,
+            "quantum": 256
+          }
+        ],
+        "conditions": {
+          "cpu": "cortex-a76"
+        },
+        "latencyLineMs": 3
+      }
+    }
+  },
+  "here": {
+    "machineClass": "rpi5",
+    "hostName": "plugin-hostd",
+    "hostVersion": "1.4.0",
+    "hostingEpoch": 2,
+    "rules": "rules-7",
+    "recordSchema": "record-3",
+    "rate": 48000,
+    "quantum": 128,
+    "facts": [
+      "kernel=rt",
+      "cpu=cortex-a76"
+    ]
+  },
+  "expect": {
+    "files": "could-not-test",
+    "layout": "not-yet-known",
+    "record": "stale",
+    "change": "files",
+    "action": "full-path",
+    "tier": null,
+    "figures": null,
+    "state": "unqualified",
+    "runs": "alone",
+    "reason": "could-not-test",
+    "source": "none"
+  }
+}

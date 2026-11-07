@@ -145,7 +145,16 @@ typedef struct PDB_DETAIL_T {
     char problem[PDB_PATH_MAX];         /* the first thing the check found, or "" */
     char verdict[16];
     char machine_class[64], host_name[64], host_version[64];
+    /* the figures of the answering record at the rate and quantum here: has_cell is 0 when no record answers or it
+     * has no cell here; a record without latencyMs or latencyLineMs has no figure or no line, and standing says so */
+    int has_cell, has_latency, has_line;
+    long rate, quantum;
+    double latency_ms, line_ms;
+    int standing;                       /* PDB_LATENCY_* */
 } pdb_detail_t;
+
+/* where a figure stands against the line: unmeasured when either is missing, never a guess */
+int pdb_latency_standing(int has_latency, double latency_ms, int has_line, double line_ms);
 
 /* the check of one entry: its pinned files collected and hashed again, its layout against current_layout (what a host
  * found, or NULL), its records, then pdb_state. 0, or -1 when address is no address or names no entry (why says

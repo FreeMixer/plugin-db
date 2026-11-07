@@ -62,7 +62,7 @@ install: all
 # ---------------------------------------------------------------------------------------------------------------------
 # tests: no plugin, no daemon
 
-test: test-pin check-tables test-state test-collect test-store test-install test-sabotage test-db-sabotage test-abi version-check
+test: test-pin check-tables check-ts test-state test-collect test-store test-golden test-install test-sabotage test-db-sabotage test-abi version-check
 
 tests/pin_test: tests/pin_test.c $(HEADERS)
 	$(CC) -Iinclude $(CRYPTO_CFLAGS) $(CFLAGS) -Werror -o $@ tests/pin_test.c $(CRYPTO_LIBS)
@@ -92,6 +92,24 @@ test-collect: $(BUILD)/collect_test
 test-store: $(BIN)
 	PDB=$(BIN) sh tests/store.sh
 
+# the reader's answer through the command: `plugin-db query --json` over a store built for each of tests/golden/*.json,
+# which ts/test/golden.test.ts holds the TypeScript twin to as well
+test-golden: $(BIN)
+	python3 tests/golden.py $(BIN) tests/golden
+
+# ts/src/vocabulary.ts is what tools/render-ts.py derives from data/ (python3 only: part of make test)
+check-ts:
+	python3 tools/render-ts.py --check data ts/src/vocabulary.ts
+
+render-ts:
+	python3 tools/render-ts.py data ts/src/vocabulary.ts
+
+# the TypeScript twin of the reader (node >= 22.18, < 25; no package is installed): its tests over the golden fixtures,
+# the vocabulary and the conformance check, then the arms that must turn them red. CI runs it in its own job.
+test-twin: $(BIN) check-ts
+	cd ts && node --test "test/*.test.ts"
+	sh tests/twin-sabotage.sh
+
 # every rule of the state function, the bundle rule, the collection and the store has an arm that must go red
 test-db-sabotage:
 	sh tests/db-sabotage.sh
@@ -99,7 +117,7 @@ test-db-sabotage:
 # the library, the command and their tests under AddressSanitizer and UBSan, in a build directory of their own
 test-asan:
 	$(MAKE) --no-print-directory BUILD=build/asan CFLAGS="-O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer \
-	  -fno-sanitize-recover=all" LDFLAGS="-fsanitize=address,undefined" test-state test-collect test-store
+	  -fno-sanitize-recover=all" LDFLAGS="-fsanitize=address,undefined" test-state test-collect test-store test-golden
 
 # a consumer compiled and linked with what pkg-config plugin-db says of a scratch install, and nothing else
 test-install:
@@ -265,6 +283,6 @@ fuzz-corpus-check: $(FUZZ_GEN)
 clean:
 	rm -rf build tests/pin_test
 
-.PHONY: all install test test-pin check-tables render-tables test-state test-collect test-store test-db-sabotage test-asan \
+.PHONY: all install test test-pin check-tables render-tables test-state test-collect test-store test-db-sabotage test-asan test-golden check-ts render-ts test-twin \
         test-install test-sabotage test-abi abi-layout abi-baseline abi-check version-check check-tools install-contract check-contract-dir \
         test-rendered-sabotage render-words check-rendered fuzz fuzz-run fuzz-sabotage fuzz-records fuzz-coverage fuzz-corpus fuzz-corpus-check clean
